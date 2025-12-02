@@ -1,3 +1,4 @@
+
 import { BeadColor, Palette } from './types';
 
 // Helper to convert hex to RGB
@@ -369,10 +370,10 @@ export const GENERIC_291_COLORS: BeadColor[] = [
 ];
 
 export const AVAILABLE_PALETTES: Palette[] = [
-  { id: 'perler', name: 'Perler (Standard 60+)', colors: PERLER_COLORS },
-  { id: 'artkal', name: 'Artkal (Full S-Series)', colors: ARTKAL_S_COLORS },
-  { id: 'generic_291', name: 'Generic 291 (Series A-Z)', colors: GENERIC_291_COLORS },
-  { id: 'hama', name: 'Hama Beads', colors: HAMA_COLORS },
+  { id: 'perler', name: 'Perler (Standard 60+) / 拼拼豆豆', colors: PERLER_COLORS },
+  { id: 'artkal', name: 'Artkal (Full S-Series) / 硬豆S系列', colors: ARTKAL_S_COLORS },
+  { id: 'generic_291', name: 'Generic 291 (Series A-Z) / 通用291色 (A-Z系列)', colors: GENERIC_291_COLORS },
+  { id: 'hama', name: 'Hama Beads / 哈马珠', colors: HAMA_COLORS },
 ];
 
 // Compatibility export

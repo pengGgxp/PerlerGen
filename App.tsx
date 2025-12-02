@@ -1,11 +1,16 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { NeuCard, NeuButton, NeuInput, NeuSelect, NeuModal } from './components/NeumorphicComponents';
 import { processImageToPattern } from './services/imageProcessor';
 import { analyzeBeadPattern } from './services/gemini';
 import { PatternData, AIAnalysis, BeadColor } from './types';
 import { AVAILABLE_PALETTES } from './constants';
+import { translations, Language } from './translations';
 
 const App = () => {
+  const [language, setLanguage] = useState<Language>('zh'); // Default to Chinese
+  const t = translations[language];
+
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   
   // Grid Dimensions State
@@ -175,7 +180,7 @@ const App = () => {
   const handleAnalyze = async () => {
     if (!imageSrc) return;
     setIsAnalyzing(true);
-    const analysis = await analyzeBeadPattern(imageSrc);
+    const analysis = await analyzeBeadPattern(imageSrc, language);
     setAiAnalysis(analysis);
     setIsAnalyzing(false);
   };
@@ -267,12 +272,6 @@ const App = () => {
     // Actually simpler: mouse relative to container top-left
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
-
-    // Apply inverse transforms
-    // Note: The container 'div' holding the canvas has the transform.
-    // The rect is the *viewport* of that container.
-    // We need the offset relative to the center of the container if origin is center, 
-    // BUT we set transform on the inner div.
     
     // Let's use the simpler approach: The visual offset is Pan + (GridSize * CellSize * Zoom / 2) logic.
     // Easiest way: The inner div center is at outer div center + pan.
@@ -419,10 +418,28 @@ const App = () => {
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center gap-6 bg-[#e0e5ec]">
-      {/* Header */}
-      <div className="text-center mb-2">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-700 tracking-tight">PerlerGen AI</h1>
-        <p className="text-slate-500 font-medium text-sm md:text-base">Magic Pixel Art Generator</p>
+      {/* Header & Language Toggle */}
+      <div className="w-full max-w-7xl flex flex-col md:flex-row justify-between items-center mb-2 gap-4">
+        <div className="text-center md:text-left">
+            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-700 tracking-tight">{t.appTitle}</h1>
+            <p className="text-slate-500 font-medium text-sm md:text-base">{t.subtitle}</p>
+        </div>
+        
+        {/* Language Toggle */}
+        <div className="bg-[#e0e5ec] p-1.5 rounded-full shadow-[inset_4px_4px_8px_0_rgba(163,177,198,0.7),inset_-4px_-4px_8px_0_rgba(255,255,255,0.8)] flex">
+           <button 
+              onClick={() => setLanguage('zh')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${language === 'zh' ? 'bg-[#e0e5ec] shadow-[4px_4px_8px_0_rgba(163,177,198,0.7),-4px_-4px_8px_0_rgba(255,255,255,0.8)] text-slate-700' : 'text-slate-400 hover:text-slate-600'}`}
+           >
+              中文
+           </button>
+           <button 
+              onClick={() => setLanguage('en')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${language === 'en' ? 'bg-[#e0e5ec] shadow-[4px_4px_8px_0_rgba(163,177,198,0.7),-4px_-4px_8px_0_rgba(255,255,255,0.8)] text-slate-700' : 'text-slate-400 hover:text-slate-600'}`}
+           >
+              EN
+           </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -433,17 +450,17 @@ const App = () => {
           
           {/* Controls */}
           <NeuCard className="flex flex-col gap-4">
-            <h2 className="text-lg font-bold text-slate-700">Config</h2>
+            <h2 className="text-lg font-bold text-slate-700">{t.config}</h2>
             
             <div className="flex flex-col gap-1">
-              <label className="text-xs font-bold text-slate-400 ml-2 uppercase">Image Source</label>
+              <label className="text-xs font-bold text-slate-400 ml-2 uppercase">{t.uploadImage}</label>
               <NeuInput type="file" accept="image/*" onChange={handleFileUpload} className="text-sm" />
             </div>
 
             {imageSrc && (
               <>
                 <div className="flex flex-col gap-1">
-                   <label className="text-xs font-bold text-slate-400 ml-2 uppercase">Bead Palette</label>
+                   <label className="text-xs font-bold text-slate-400 ml-2 uppercase">{t.palette}</label>
                    <NeuSelect 
                       value={selectedPaletteId} 
                       onChange={(e) => setSelectedPaletteId(e.target.value)}
@@ -456,16 +473,16 @@ const App = () => {
 
                 <div className="flex flex-col gap-2">
                     <div className="flex justify-between items-end px-1">
-                       <label className="text-xs font-bold text-slate-400 uppercase ml-1">Grid Size</label>
+                       <label className="text-xs font-bold text-slate-400 uppercase ml-1">{t.gridSize}</label>
                        <button 
                             onClick={() => setLockRatio(!lockRatio)}
                             className={`p-1.5 rounded-lg transition-all text-xs flex items-center gap-1 ${lockRatio ? 'bg-slate-300 text-slate-700 shadow-inner' : 'text-slate-400 hover:text-slate-600'}`}
-                            title={lockRatio ? "Ratio Locked" : "Ratio Unlocked"}
+                            title={lockRatio ? t.ratioLocked : t.ratioUnlocked}
                         >
                             {lockRatio ? (
-                                <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg> Locked</>
+                                <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg> {t.ratioLocked}</>
                             ) : (
-                                <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg> Unlocked</>
+                                <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg> {t.ratioUnlocked}</>
                             )}
                         </button>
                     </div>
@@ -479,7 +496,7 @@ const App = () => {
                                 min="1"
                                 className="text-center font-mono w-full pr-8"
                             />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold pointer-events-none">W</span>
+                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold pointer-events-none">{t.width}</span>
                         </div>
                         <span className="text-slate-400 font-bold text-sm">×</span>
                         <div className="flex-1 relative">
@@ -490,13 +507,13 @@ const App = () => {
                                 min="1"
                                 className="text-center font-mono w-full pr-8"
                             />
-                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold pointer-events-none">H</span>
+                             <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-bold pointer-events-none">{t.height}</span>
                         </div>
                     </div>
                 </div>
 
                 <div className="flex justify-between items-center px-2 py-1">
-                   <label className="text-sm font-bold text-slate-500">Circular Beads</label>
+                   <label className="text-sm font-bold text-slate-500">{t.circularBeads}</label>
                    <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
                         <input 
                             type="checkbox" 
@@ -517,11 +534,11 @@ const App = () => {
                     className="w-full flex justify-center items-center gap-2 text-sm"
                   >
                     {isAnalyzing ? (
-                      <span className="animate-pulse">Analyzing...</span>
+                      <span className="animate-pulse">{t.analyzing}</span>
                     ) : (
                       <>
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                        Get AI Ideas
+                        {t.analyzeBtn}
                       </>
                     )}
                   </NeuButton>
@@ -554,9 +571,9 @@ const App = () => {
           {patternData && (
             <NeuCard className="flex flex-col gap-4 max-h-[400px] overflow-hidden flex-1">
               <div className="flex justify-between items-end pb-2 border-b border-slate-300">
-                <h2 className="text-lg font-bold text-slate-700">Materials</h2>
+                <h2 className="text-lg font-bold text-slate-700">{t.materials}</h2>
                 <span className="text-xs font-bold text-slate-400">
-                  Visible: {Object.entries(patternData.counts)
+                  {t.visible}: {Object.entries(patternData.counts)
                     .filter(([id]) => !hiddenBeadIds.has(id))
                     .reduce((sum, [, count]) => sum + (count as number), 0)}
                 </span>
@@ -579,14 +596,14 @@ const App = () => {
                                 currentBead: bead
                             });
                         }}
-                        title="Click to replace color"
+                        title={t.clickToReplace}
                       >
                         <div className="flex items-center gap-3">
                            {/* Visibility Toggle */}
                           <button 
                              onClick={(e) => toggleBeadVisibility(bead.id, e)}
                              className="text-slate-400 hover:text-slate-600 focus:outline-none transition-colors p-1"
-                             title={isHidden ? "Show beads" : "Hide beads"}
+                             title={isHidden ? t.showBeads : t.hideBeads}
                           >
                              {isHidden ? (
                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
@@ -623,7 +640,7 @@ const App = () => {
             {!imageSrc ? (
                <div className="flex flex-col items-center gap-4 text-slate-400 p-8">
                  <svg className="w-24 h-24 opacity-20" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" /></svg>
-                 <p className="font-bold text-lg opacity-50">Upload an image to start</p>
+                 <p className="font-bold text-lg opacity-50">{t.noImage}</p>
                </div>
             ) : (
               <div 
@@ -639,7 +656,7 @@ const App = () => {
                  {/* Instructions overlay */}
                  <div className="absolute top-4 left-4 z-10 pointer-events-none opacity-40 hover:opacity-100 transition-opacity">
                     <div className="bg-slate-800/10 text-slate-500 text-[10px] px-2 py-1 rounded backdrop-blur-sm">
-                        Scroll: Zoom • Drag: Pan • Click: Edit
+                        {t.zoomInstruction}
                     </div>
                  </div>
 
@@ -672,7 +689,7 @@ const App = () => {
                      <button 
                         onClick={(e) => { e.stopPropagation(); setZoom(1); setPan({x:0, y:0}); }}
                         className="absolute bottom-4 left-4 p-2 bg-white/80 rounded-full shadow-lg text-slate-600 hover:text-blue-500 z-20"
-                        title="Reset View"
+                        title={t.resetView}
                      >
                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
                      </button>
@@ -689,7 +706,7 @@ const App = () => {
                   className="flex items-center gap-2 shadow-lg"
                >
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                 Download Pattern
+                 {t.download}
                </NeuButton>
              </div>
           )}
@@ -700,7 +717,7 @@ const App = () => {
       <NeuModal
         isOpen={!!pickingColorFor}
         onClose={() => { setPickingColorFor(null); setColorSearch(''); }}
-        title={pickingColorFor?.type === 'global' ? 'Replace Color Globally' : 'Edit Bead'}
+        title={pickingColorFor?.type === 'global' ? t.replaceGlobalTitle : t.editBeadTitle}
       >
         <div className="flex flex-col gap-4">
             
@@ -710,13 +727,13 @@ const App = () => {
                     <button 
                         className="flex-1 py-2 text-xs font-bold rounded-lg bg-white shadow-sm text-slate-700 transition-all"
                     >
-                        Change This Bead
+                        {t.changeThisBtn}
                     </button>
                     <button 
                         className="flex-1 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 transition-all"
                         onClick={() => setPickingColorFor(prev => prev ? { ...prev, type: 'global', targetId: prev.currentBead?.id } : null)}
                     >
-                        Change All '{pickingColorFor.currentBead?.name}'
+                        {t.changeAllBtn} '{pickingColorFor.currentBead?.name}'
                     </button>
                 </div>
             )}
@@ -725,14 +742,14 @@ const App = () => {
             <div className="flex items-center gap-3 p-3 bg-slate-200/50 rounded-xl border border-white/50">
                 <div className="w-10 h-10 rounded-full border border-slate-300 shadow-sm" style={{ backgroundColor: pickingColorFor?.currentBead?.hex }}></div>
                 <div className="flex flex-col">
-                    <span className="text-xs font-bold text-slate-500 uppercase">Current Color</span>
+                    <span className="text-xs font-bold text-slate-500 uppercase">{t.currentColor}</span>
                     <span className="font-bold text-slate-700">{pickingColorFor?.currentBead?.name} ({pickingColorFor?.currentBead?.id})</span>
                 </div>
             </div>
 
             {/* Search */}
             <NeuInput 
-                placeholder="Search colors..." 
+                placeholder={t.searchPlaceholder}
                 value={colorSearch}
                 onChange={(e) => setColorSearch(e.target.value)}
                 autoFocus
