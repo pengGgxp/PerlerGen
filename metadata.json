@@ -1,0 +1,5 @@
+{
+  "name": "PerlerGen AI",
+  "description": "A smart Perler bead pattern generator with Neumorphic design. Converts images into bead patterns, calculates materials, and uses Gemini AI to analyze the design.",
+  "requestFramePermissions": []
+}

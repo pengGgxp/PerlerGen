@@ -1,0 +1,68 @@
+import React, { ReactNode } from 'react';
+
+// Common base styles
+const BASE_BG = 'bg-[#e0e5ec]';
+const TEXT_COLOR = 'text-slate-600';
+
+// Shadow styles
+const SHADOW_OUT = 'shadow-[9px_9px_16px_rgb(163,177,198,0.6),-9px_-9px_16px_rgba(255,255,255,0.5)]';
+const SHADOW_IN = 'shadow-[inset_6px_6px_10px_0_rgba(163,177,198,0.7),inset_-6px_-6px_10px_0_rgba(255,255,255,0.8)]';
+
+interface Props {
+  children?: ReactNode;
+  className?: string;
+  onClick?: () => void;
+  active?: boolean;
+}
+
+export const NeuCard: React.FC<Props> = ({ children, className = '' }) => (
+  <div className={`${BASE_BG} ${SHADOW_OUT} rounded-2xl p-6 ${className}`}>
+    {children}
+  </div>
+);
+
+export const NeuButton: React.FC<Props & { disabled?: boolean }> = ({ children, className = '', onClick, active, disabled }) => (
+  <button
+    onClick={onClick}
+    disabled={disabled}
+    className={`
+      ${BASE_BG} 
+      ${active ? SHADOW_IN : SHADOW_OUT} 
+      ${disabled ? 'opacity-50 cursor-not-allowed' : 'active:shadow-[inset_4px_4px_8px_0_rgba(163,177,198,0.7),inset_-4px_-4px_8px_0_rgba(255,255,255,0.8)] transform active:scale-[0.98]'}
+      rounded-full px-6 py-2 font-bold ${TEXT_COLOR} transition-all duration-200
+      ${className}
+    `}
+  >
+    {children}
+  </button>
+);
+
+export const NeuInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (props) => (
+  <input
+    {...props}
+    className={`
+      ${BASE_BG} ${SHADOW_IN}
+      rounded-xl px-4 py-3 outline-none ${TEXT_COLOR}
+      focus:ring-2 focus:ring-slate-300 transition-all
+      ${props.className}
+    `}
+  />
+);
+
+export const NeuRange: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label?: string, valueDisplay?: string }> = ({ label, valueDisplay, ...props }) => (
+  <div className="flex flex-col gap-2 w-full">
+    {(label || valueDisplay) && (
+      <div className="flex justify-between px-1">
+        <span className="text-sm font-semibold text-slate-500">{label}</span>
+        <span className="text-sm font-bold text-slate-600">{valueDisplay}</span>
+      </div>
+    )}
+    <div className={`h-8 rounded-full ${SHADOW_IN} flex items-center px-2`}>
+      <input
+        type="range"
+        {...props}
+        className="w-full h-2 bg-transparent appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-slate-400 [&::-webkit-slider-thumb]:shadow-md"
+      />
+    </div>
+  </div>
+);
