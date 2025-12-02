@@ -314,6 +314,109 @@ const App = () => {
     }
   };
 
+  // Export with coordinates
+  const handleDownload = () => {
+    if (!patternData) return;
+
+    // Settings for the export image
+    const cellSize = 20; // Larger than screen for better quality
+    const margin = 35; // Space for labels
+    const width = patternData.width * cellSize + margin;
+    const height = patternData.height * cellSize + margin;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) return;
+
+    // Fill white background
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, width, height);
+
+    // Setup Text
+    ctx.font = 'bold 10px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#64748b'; // Slate-500
+
+    // Draw Top Numbers (Columns)
+    for (let x = 0; x < patternData.width; x++) {
+        // Label every 5th, plus the 1st
+        if ((x + 1) === 1 || (x + 1) % 5 === 0) {
+            ctx.fillText(`${x + 1}`, margin + x * cellSize + cellSize / 2, margin / 2);
+        }
+    }
+
+    // Draw Left Numbers (Rows)
+    for (let y = 0; y < patternData.height; y++) {
+        if ((y + 1) === 1 || (y + 1) % 5 === 0) {
+            ctx.fillText(`${y + 1}`, margin / 2, margin + y * cellSize + cellSize / 2);
+        }
+    }
+
+    // Move to grid area
+    ctx.translate(margin, margin);
+
+    // Draw Grid
+    patternData.grid.forEach((row, y) => {
+        row.forEach((bead, x) => {
+            // Background grid cell border
+            ctx.strokeStyle = '#e2e8f0'; // Light grey
+            ctx.lineWidth = 1;
+            ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
+            if (!hiddenBeadIds.has(bead.id)) {
+                ctx.fillStyle = bead.hex;
+                // Draw Bead
+                if (showGridLines) {
+                    ctx.beginPath();
+                    ctx.arc(
+                        x * cellSize + cellSize / 2, 
+                        y * cellSize + cellSize / 2, 
+                        (cellSize / 2) - 1.5, 
+                        0, 
+                        2 * Math.PI
+                    );
+                    ctx.fill();
+                } else {
+                    ctx.fillRect(x * cellSize + 1, y * cellSize + 1, cellSize - 2, cellSize - 2);
+                }
+            } else {
+                // If hidden, maybe just a cross or empty? Leaving empty.
+            }
+        });
+    });
+
+    // Add darker lines every 10 cells for easy counting
+    ctx.strokeStyle = '#94a3b8'; // Slate-400
+    ctx.lineWidth = 2;
+    // Verticals
+    for (let i = 0; i <= patternData.width; i += 10) {
+         ctx.beginPath();
+         ctx.moveTo(i * cellSize, 0);
+         ctx.lineTo(i * cellSize, patternData.height * cellSize);
+         ctx.stroke();
+    }
+    // Horizontals
+    for (let i = 0; i <= patternData.height; i += 10) {
+         ctx.beginPath();
+         ctx.moveTo(0, i * cellSize);
+         ctx.lineTo(patternData.width * cellSize, i * cellSize);
+         ctx.stroke();
+    }
+
+    // Border around the whole grid
+    ctx.strokeRect(0, 0, patternData.width * cellSize, patternData.height * cellSize);
+
+    // Trigger Download
+    const link = document.createElement('a');
+    link.download = `perler-pattern-w${patternData.width}-h${patternData.height}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  };
+
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center gap-6 bg-[#e0e5ec]">
       {/* Header */}
@@ -582,14 +685,7 @@ const App = () => {
           {patternData && (
              <div className="flex justify-end">
                <NeuButton 
-                  onClick={() => {
-                     if (canvasRef.current) {
-                        const link = document.createElement('a');
-                        link.download = `perler-pattern-${gridWidth}x${gridHeight}.png`;
-                        link.href = canvasRef.current.toDataURL();
-                        link.click();
-                     }
-                  }}
+                  onClick={handleDownload}
                   className="flex items-center gap-2 shadow-lg"
                >
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
