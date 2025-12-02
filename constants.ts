@@ -1,7 +1,28 @@
-import { BeadColor } from './types';
+import { BeadColor, Palette } from './types';
 
-// A subset of popular Perler Bead colors
-export const BEAD_PALETTE: BeadColor[] = [
+// Helper to convert hex to RGB
+export const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result
+    ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16),
+      }
+    : { r: 0, g: 0, b: 0 };
+};
+
+// Color distance
+export const getColorDistance = (c1: { r: number; g: number; b: number }, c2: { r: number; g: number; b: number }) => {
+  const rmean = (c1.r + c2.r) / 2;
+  const r = c1.r - c2.r;
+  const g = c1.g - c2.g;
+  const b = c1.b - c2.b;
+  return Math.sqrt((((512 + rmean) * r * r) >> 8) + 4 * g * g + (((767 - rmean) * b * b) >> 8));
+};
+
+// --- Perler Bead Colors (P-Series Standard) ---
+export const PERLER_COLORS: BeadColor[] = [
   { id: 'P01', name: 'Black', hex: '#2E2E2E' },
   { id: 'P02', name: 'White', hex: '#FFFFFF' },
   { id: 'P03', name: 'Red', hex: '#C62933' },
@@ -30,26 +51,329 @@ export const BEAD_PALETTE: BeadColor[] = [
   { id: 'P26', name: 'Plum', hex: '#7A3575' },
   { id: 'P27', name: 'Kiwi Lime', hex: '#7BC744' },
   { id: 'P28', name: 'Blush', hex: '#FF9796' },
+  { id: 'P29', name: 'Bubblegum', hex: '#E75890' },
+  { id: 'P30', name: 'Pastel Lavender', hex: '#A689B4' },
+  { id: 'P31', name: 'Shamrock', hex: '#007F38' },
+  { id: 'P32', name: 'Bright Green', hex: '#4DA746' },
+  { id: 'P33', name: 'Teal', hex: '#1C6B71' },
+  { id: 'P34', name: 'Plum', hex: '#7A3575' },
+  { id: 'P35', name: 'Lavender', hex: '#8D70A8' },
+  { id: 'P36', name: 'Raspberry', hex: '#A8254E' },
+  { id: 'P37', name: 'Light Pink', hex: '#FFB5C6' },
+  { id: 'P38', name: 'Cocoa', hex: '#493128' },
+  { id: 'P39', name: 'Sand', hex: '#E1BC96' },
+  { id: 'P40', name: 'Gold Metallic', hex: '#B39233' },
+  { id: 'P41', name: 'Silver Metallic', hex: '#8F9194' },
+  { id: 'P42', name: 'Bronze', hex: '#7C603D' },
+  { id: 'P43', name: 'Clear', hex: '#DAE5E8' },
+  { id: 'P45', name: 'Pearl', hex: '#FDFDFD' },
+  { id: 'P46', name: 'Glow in Dark', hex: '#E6F5CF' },
+  { id: 'P47', name: 'Neon Yellow', hex: '#E8E321' },
+  { id: 'P48', name: 'Neon Orange', hex: '#FF7120' },
+  { id: 'P49', name: 'Neon Green', hex: '#00A44B' },
+  { id: 'P50', name: 'Neon Pink', hex: '#FF4375' },
+  { id: 'P51', name: 'Neon Blue', hex: '#007CB5' },
+  { id: 'P52', name: 'Charcoal', hex: '#37383A' },
+  { id: 'P53', name: 'Eggplant', hex: '#3F2856' },
+  { id: 'P54', name: 'Periwinkle', hex: '#6379A5' },
+  { id: 'P55', name: 'Evergreen', hex: '#174033' },
+  { id: 'P56', name: 'Tomato', hex: '#D22E26' },
+  { id: 'P57', name: 'Spice', hex: '#B44C2B' },
+  { id: 'P58', name: 'Apricot', hex: '#F8A86C' },
+  { id: 'P59', name: 'Fern', hex: '#4F7C39' },
+  { id: 'P60', name: 'Olive', hex: '#5D5D3A' },
+  { id: 'P61', name: 'Midnight', hex: '#111D37' },
+  { id: 'P62', name: 'Slime', hex: '#94C640' },
+  { id: 'P70', name: 'Toasted Marshmallow', hex: '#E9D6C0' },
+  { id: 'P79', name: 'Cranapple', hex: '#7E1C24' },
+  { id: 'P80', name: 'Green Apple', hex: '#77BD2F' },
+  { id: 'P81', name: 'Dark Spruce', hex: '#004245' },
+  { id: 'P82', name: 'Cobalt', hex: '#00549A' },
+  { id: 'P83', name: 'Sky', hex: '#5AB3E6' },
+  { id: 'P84', name: 'Salmon', hex: '#FF6F64' },
+  { id: 'P85', name: 'Fawn', hex: '#BCA382' },
+  { id: 'P88', name: 'Cherry', hex: '#B3000C' },
+  { id: 'P90', name: 'Mist', hex: '#B9CFD6' },
+  { id: 'P91', name: 'Pewter', hex: '#737579' },
+  { id: 'P92', name: 'Cotton Candy', hex: '#F98CB7' },
+  { id: 'P93', name: 'Blueberry Cream', hex: '#6F84C3' },
 ];
 
-// Helper to convert hex to RGB
-export const hexToRgb = (hex: string): { r: number; g: number; b: number } => {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result
-    ? {
-        r: parseInt(result[1], 16),
-        g: parseInt(result[2], 16),
-        b: parseInt(result[3], 16),
-      }
-    : { r: 0, g: 0, b: 0 };
-};
+// --- Hama Bead Colors (Midi/Mini) ---
+export const HAMA_COLORS: BeadColor[] = [
+  { id: 'H01', name: 'White', hex: '#FFFFFF' },
+  { id: 'H02', name: 'Cream', hex: '#F4F1D7' },
+  { id: 'H03', name: 'Yellow', hex: '#FEF045' },
+  { id: 'H04', name: 'Orange', hex: '#F68B1F' },
+  { id: 'H05', name: 'Red', hex: '#CF2131' },
+  { id: 'H06', name: 'Pink', hex: '#E86A92' },
+  { id: 'H07', name: 'Purple', hex: '#6C3B87' },
+  { id: 'H08', name: 'Blue', hex: '#1E56A0' },
+  { id: 'H09', name: 'Light Blue', hex: '#4A96D2' },
+  { id: 'H10', name: 'Green', hex: '#00934E' },
+  { id: 'H11', name: 'Light Green', hex: '#66C069' },
+  { id: 'H12', name: 'Brown', hex: '#573E32' },
+  { id: 'H17', name: 'Grey', hex: '#8F9194' },
+  { id: 'H18', name: 'Black', hex: '#000000' },
+  { id: 'H20', name: 'Reddish Brown', hex: '#8D4333' },
+  { id: 'H21', name: 'Light Brown', hex: '#C68755' },
+  { id: 'H22', name: 'Dark Red', hex: '#9A1F30' },
+  { id: 'H26', name: 'Flesh', hex: '#FFCBA4' },
+  { id: 'H27', name: 'Beige', hex: '#F5F5DC' },
+  { id: 'H28', name: 'Dark Green', hex: '#0E4D2D' },
+  { id: 'H29', name: 'Claret', hex: '#800000' },
+  { id: 'H30', name: 'Burgundy', hex: '#5B1E22' },
+  { id: 'H31', name: 'Turquoise', hex: '#40E0D0' },
+  { id: 'H32', name: 'Neon Fuschia', hex: '#FF007F' },
+  { id: 'H33', name: 'Neon Cerise', hex: '#DE3163' },
+  { id: 'H34', name: 'Neon Yellow', hex: '#EAFF00' },
+  { id: 'H35', name: 'Neon Red', hex: '#FF073A' },
+  { id: 'H36', name: 'Neon Blue', hex: '#00FFFF' },
+  { id: 'H37', name: 'Neon Green', hex: '#39FF14' },
+  { id: 'H38', name: 'Neon Orange', hex: '#FF5F00' },
+  { id: 'H43', name: 'Pastel Yellow', hex: '#FDFD96' },
+  { id: 'H44', name: 'Pastel Red', hex: '#FF6961' },
+  { id: 'H45', name: 'Pastel Purple', hex: '#B39EB5' },
+  { id: 'H46', name: 'Pastel Blue', hex: '#AEC6CF' },
+  { id: 'H47', name: 'Pastel Green', hex: '#77DD77' },
+  { id: 'H48', name: 'Pastel Pink', hex: '#FFB7C5' },
+  { id: 'H49', name: 'Azure', hex: '#007FFF' },
+  { id: 'H60', name: 'Teddy Bear Brown', hex: '#704214' },
+];
 
-// Color distance (Euclidean approximation is usually enough for this scale, 
-// though LAB is better, we stick to simple weighted RGB for performance/simplicity)
-export const getColorDistance = (c1: { r: number; g: number; b: number }, c2: { r: number; g: number; b: number }) => {
-  const rmean = (c1.r + c2.r) / 2;
-  const r = c1.r - c2.r;
-  const g = c1.g - c2.g;
-  const b = c1.b - c2.b;
-  return Math.sqrt((((512 + rmean) * r * r) >> 8) + 4 * g * g + (((767 - rmean) * b * b) >> 8));
-};
+// --- Artkal S-Series (Soft) Comprehensive ---
+export const ARTKAL_S_COLORS: BeadColor[] = [
+  { id: 'S01', name: 'Black', hex: '#0f0f0f' },
+  { id: 'S02', name: 'White', hex: '#FFFFFF' },
+  { id: 'S03', name: 'Red', hex: '#D11C33' },
+  { id: 'S04', name: 'Cream', hex: '#FFFDD0' },
+  { id: 'S05', name: 'Dark Grey', hex: '#555555' },
+  { id: 'S06', name: 'Orange', hex: '#F57D25' },
+  { id: 'S07', name: 'Green', hex: '#00974A' },
+  { id: 'S08', name: 'Blue', hex: '#0047AB' },
+  { id: 'S09', name: 'Yellow', hex: '#F9D61D' },
+  { id: 'S10', name: 'Purple', hex: '#6A0DAD' },
+  { id: 'S11', name: 'Brown', hex: '#8B4513' },
+  { id: 'S12', name: 'Light Grey', hex: '#D3D3D3' },
+  { id: 'S13', name: 'Pastel Green', hex: '#98FB98' },
+  { id: 'S14', name: 'Pastel Blue', hex: '#ADD8E6' },
+  { id: 'S15', name: 'Pastel Purple', hex: '#DDA0DD' },
+  { id: 'S16', name: 'Pastel Pink', hex: '#FFB6C1' },
+  { id: 'S17', name: 'Pastel Yellow', hex: '#FAFAD2' },
+  { id: 'S18', name: 'Dark Blue', hex: '#00008B' },
+  { id: 'S19', name: 'Light Green', hex: '#90EE90' },
+  { id: 'S20', name: 'Magenta', hex: '#FF00FF' },
+  { id: 'S21', name: 'Light Pink', hex: '#FFB7C5' },
+  { id: 'S22', name: 'Neon Green', hex: '#39FF14' },
+  { id: 'S23', name: 'Neon Orange', hex: '#FF5F00' },
+  { id: 'S24', name: 'Neon Yellow', hex: '#EAFF00' },
+  { id: 'S25', name: 'Neon Pink', hex: '#FF007F' },
+  { id: 'S26', name: 'Neon Blue', hex: '#00FFFF' },
+  { id: 'S27', name: 'Flesh', hex: '#FFCBA4' },
+  { id: 'S28', name: 'Reddish Brown', hex: '#A52A2A' },
+  { id: 'S29', name: 'Gold', hex: '#FFD700' },
+  { id: 'S30', name: 'Silver', hex: '#C0C0C0' },
+  { id: 'S31', name: 'Violet', hex: '#8F00FF' },
+  { id: 'S32', name: 'Turquoise', hex: '#40E0D0' },
+  { id: 'S33', name: 'Chocolate', hex: '#D2691E' },
+  { id: 'S34', name: 'Dark Green', hex: '#006400' },
+  { id: 'S35', name: 'Lilac', hex: '#C8A2C8' },
+  { id: 'S36', name: 'Mint', hex: '#3EB489' },
+  { id: 'S37', name: 'Sky Blue', hex: '#87CEEB' },
+  { id: 'S38', name: 'Navy Blue', hex: '#000080' },
+  { id: 'S39', name: 'Olive Green', hex: '#808000' },
+  { id: 'S40', name: 'Tangerine', hex: '#F28500' },
+  { id: 'S41', name: 'Mustard', hex: '#FFDB58' },
+  { id: 'S42', name: 'Maroon', hex: '#800000' },
+  { id: 'S43', name: 'Teal', hex: '#008080' },
+  { id: 'S44', name: 'Rose', hex: '#FF007F' },
+  { id: 'S45', name: 'Slate Blue', hex: '#6A5ACD' },
+  { id: 'S46', name: 'Peach', hex: '#FFE5B4' },
+  { id: 'S47', name: 'Sand', hex: '#C2B280' },
+  { id: 'S48', name: 'Beige', hex: '#F5F5DC' },
+  { id: 'S49', name: 'Lavender', hex: '#E6E6FA' },
+  { id: 'S50', name: 'Coral', hex: '#FF7F50' },
+  { id: 'S51', name: 'Indigo', hex: '#4B0082' },
+  { id: 'S52', name: 'Charcoal', hex: '#36454F' },
+  { id: 'S53', name: 'Periwinkle', hex: '#CCCCFF' },
+  { id: 'S54', name: 'Apricot', hex: '#FBCEB1' },
+  { id: 'S55', name: 'Lime Green', hex: '#32CD32' },
+  { id: 'S56', name: 'Forest Green', hex: '#228B22' },
+  { id: 'S57', name: 'Plum', hex: '#8E4585' },
+  { id: 'S58', name: 'Crimson', hex: '#DC143C' },
+  { id: 'S59', name: 'Rust', hex: '#B7410E' },
+  { id: 'S60', name: 'Cobalt Blue', hex: '#0047AB' },
+  { id: 'S61', name: 'Aqua', hex: '#00FFFF' },
+  { id: 'S62', name: 'Mauve', hex: '#E0B0FF' },
+  { id: 'S63', name: 'Taupe', hex: '#483C32' },
+  { id: 'S64', name: 'Ochre', hex: '#CC7722' },
+  { id: 'S65', name: 'Sienna', hex: '#A0522D' },
+  { id: 'S66', name: 'Steel Grey', hex: '#71797E' },
+  { id: 'S67', name: 'Bronze', hex: '#CD7F32' },
+  { id: 'S68', name: 'Copper', hex: '#B87333' },
+  { id: 'S69', name: 'Pearl', hex: '#EAE0C8' },
+  { id: 'S70', name: 'Glow Green', hex: '#D0F0C0' },
+  { id: 'S87', name: 'Ash Grey', hex: '#B2BEB5' },
+  { id: 'S88', name: 'Butter', hex: '#FFFD74' },
+  { id: 'S89', name: 'Salmon', hex: '#FA8072' },
+  { id: 'S90', name: 'Seafoam', hex: '#9FE2BF' },
+  { id: 'S91', name: 'Denim', hex: '#1560BD' },
+  { id: 'S92', name: 'Midnight Blue', hex: '#191970' },
+  { id: 'S93', name: 'Orchid', hex: '#DA70D6' },
+  { id: 'S94', name: 'Khaki', hex: '#C3B091' },
+  { id: 'S95', name: 'Tan', hex: '#D2B48C' },
+];
+
+// --- Generic 291 / "Series A-Z" (Approximation for Lipin/Chinese Sets) ---
+// Categorized by color hue groups as per typical A-Z generic sorting
+export const GENERIC_291_COLORS: BeadColor[] = [
+  // A Series: Reds & Deep Pinks
+  { id: 'A01', name: 'Dark Red', hex: '#8B0000' },
+  { id: 'A02', name: 'Crimson', hex: '#DC143C' },
+  { id: 'A03', name: 'Red', hex: '#FF0000' },
+  { id: 'A04', name: 'Bright Red', hex: '#FF3333' },
+  { id: 'A05', name: 'Scarlet', hex: '#FF2400' },
+  { id: 'A06', name: 'Rose', hex: '#FF007F' },
+  { id: 'A07', name: 'Deep Pink', hex: '#FF1493' },
+  { id: 'A08', name: 'Watermelon', hex: '#FC6C85' },
+  
+  // B Series: Oranges & Corals
+  { id: 'B01', name: 'Burnt Orange', hex: '#CC5500' },
+  { id: 'B02', name: 'Pumpkin', hex: '#FF7518' },
+  { id: 'B03', name: 'Orange', hex: '#FFA500' },
+  { id: 'B04', name: 'Tangerine', hex: '#F28500' },
+  { id: 'B05', name: 'Coral', hex: '#FF7F50' },
+  { id: 'B06', name: 'Light Orange', hex: '#FFB347' },
+  { id: 'B07', name: 'Peach', hex: '#FFE5B4' },
+  { id: 'B08', name: 'Salmon', hex: '#FA8072' },
+
+  // C Series: Yellows
+  { id: 'C01', name: 'Gold', hex: '#FFD700' },
+  { id: 'C02', name: 'Goldenrod', hex: '#DAA520' },
+  { id: 'C03', name: 'Yellow', hex: '#FFFF00' },
+  { id: 'C04', name: 'Lemon', hex: '#FFF44F' },
+  { id: 'C05', name: 'Cream', hex: '#FFFDD0' },
+  { id: 'C06', name: 'Pale Yellow', hex: '#FFFFE0' },
+  { id: 'C07', name: 'Mustard', hex: '#FFDB58' },
+  { id: 'C08', name: 'Maize', hex: '#FBEC5D' },
+
+  // D Series: Greens (Dark/Forest)
+  { id: 'D01', name: 'Dark Green', hex: '#006400' },
+  { id: 'D02', name: 'Forest Green', hex: '#228B22' },
+  { id: 'D03', name: 'Green', hex: '#008000' },
+  { id: 'D04', name: 'Emerald', hex: '#50C878' },
+  { id: 'D05', name: 'Olive', hex: '#808000' },
+  { id: 'D06', name: 'Army Green', hex: '#4B5320' },
+  { id: 'D07', name: 'Kelly Green', hex: '#4CBB17' },
+  { id: 'D08', name: 'Shamrock', hex: '#009E60' },
+
+  // E Series: Light Greens & Teals
+  { id: 'E01', name: 'Lime', hex: '#00FF00' },
+  { id: 'E02', name: 'Chartreuse', hex: '#7FFF00' },
+  { id: 'E03', name: 'Spring Green', hex: '#00FF7F' },
+  { id: 'E04', name: 'Mint', hex: '#98FF98' },
+  { id: 'E05', name: 'Seafoam', hex: '#9FE2BF' },
+  { id: 'E06', name: 'Teal', hex: '#008080' },
+  { id: 'E07', name: 'Turquoise', hex: '#40E0D0' },
+  { id: 'E08', name: 'Aqua', hex: '#00FFFF' },
+
+  // F Series: Blues
+  { id: 'F01', name: 'Navy', hex: '#000080' },
+  { id: 'F02', name: 'Midnight Blue', hex: '#191970' },
+  { id: 'F03', name: 'Royal Blue', hex: '#4169E1' },
+  { id: 'F04', name: 'Blue', hex: '#0000FF' },
+  { id: 'F05', name: 'Cobalt', hex: '#0047AB' },
+  { id: 'F06', name: 'Cerulean', hex: '#007BA7' },
+  { id: 'F07', name: 'Sky Blue', hex: '#87CEEB' },
+  { id: 'F08', name: 'Baby Blue', hex: '#89CFF0' },
+
+  // G Series: Purples & Violets
+  { id: 'G01', name: 'Indigo', hex: '#4B0082' },
+  { id: 'G02', name: 'Purple', hex: '#800080' },
+  { id: 'G03', name: 'Violet', hex: '#EE82EE' },
+  { id: 'G04', name: 'Magenta', hex: '#FF00FF' },
+  { id: 'G05', name: 'Orchid', hex: '#DA70D6' },
+  { id: 'G06', name: 'Plum', hex: '#DDA0DD' },
+  { id: 'G07', name: 'Lavender', hex: '#E6E6FA' },
+  { id: 'G08', name: 'Lilac', hex: '#C8A2C8' },
+
+  // H Series: Pinks (Light)
+  { id: 'H01', name: 'Hot Pink', hex: '#FF69B4' },
+  { id: 'H02', name: 'Pink', hex: '#FFC0CB' },
+  { id: 'H03', name: 'Light Pink', hex: '#FFB6C1' },
+  { id: 'H04', name: 'Carnation', hex: '#FFA6C9' },
+  { id: 'H05', name: 'Bubblegum', hex: '#FE7D6A' },
+  { id: 'H06', name: 'Fuchsia', hex: '#FF00FF' },
+  { id: 'H07', name: 'Mauve', hex: '#E0B0FF' },
+  { id: 'H08', name: 'Blush', hex: '#DE5D83' },
+
+  // M Series: Browns & Earth Tones
+  { id: 'M01', name: 'Dark Brown', hex: '#654321' },
+  { id: 'M02', name: 'Chocolate', hex: '#7B3F00' },
+  { id: 'M03', name: 'Brown', hex: '#964B00' },
+  { id: 'M04', name: 'Sienna', hex: '#A0522D' },
+  { id: 'M05', name: 'Rust', hex: '#B7410E' },
+  { id: 'M06', name: 'Bronze', hex: '#CD7F32' },
+  { id: 'M07', name: 'Copper', hex: '#B87333' },
+  { id: 'M08', name: 'Tan', hex: '#D2B48C' },
+
+  // P Series: Skin Tones & Beiges
+  { id: 'P01', name: 'Beige', hex: '#F5F5DC' },
+  { id: 'P02', name: 'Sand', hex: '#C2B280' },
+  { id: 'P03', name: 'Flesh', hex: '#FFCBA4' },
+  { id: 'P04', name: 'Light Beige', hex: '#FAF0E6' },
+  { id: 'P05', name: 'Apricot', hex: '#FBCEB1' },
+  { id: 'P06', name: 'Khaki', hex: '#C3B091' },
+  { id: 'P07', name: 'Taupe', hex: '#483C32' },
+  { id: 'P08', name: 'Wheat', hex: '#F5DEB3' },
+
+  // Q Series: Greys
+  { id: 'Q01', name: 'Black', hex: '#000000' },
+  { id: 'Q02', name: 'Dark Grey', hex: '#A9A9A9' },
+  { id: 'Q03', name: 'Grey', hex: '#808080' },
+  { id: 'Q04', name: 'Light Grey', hex: '#D3D3D3' },
+  { id: 'Q05', name: 'Silver', hex: '#C0C0C0' },
+  { id: 'Q06', name: 'Slate', hex: '#708090' },
+  { id: 'Q07', name: 'Charcoal', hex: '#36454F' },
+  { id: 'Q08', name: 'White', hex: '#FFFFFF' },
+
+  // R Series: Red Variations & Wines
+  { id: 'R01', name: 'Maroon', hex: '#800000' },
+  { id: 'R02', name: 'Burgundy', hex: '#800020' },
+  { id: 'R03', name: 'Wine', hex: '#722F37' },
+  { id: 'R04', name: 'Brick', hex: '#CB4154' },
+  { id: 'R05', name: 'Cardinal', hex: '#C41E3A' },
+  { id: 'R06', name: 'Carmine', hex: '#960018' },
+  { id: 'R07', name: 'Cerise', hex: '#DE3163' },
+  { id: 'R08', name: 'Ruby', hex: '#E0115F' },
+
+  // Y Series: Yellow/Green Mixes
+  { id: 'Y01', name: 'Yellow Green', hex: '#9ACD32' },
+  { id: 'Y02', name: 'Lime', hex: '#BFFF00' },
+  { id: 'Y03', name: 'Pear', hex: '#D1E231' },
+  { id: 'Y04', name: 'Citron', hex: '#9FA91F' },
+  { id: 'Y05', name: 'Olive Drab', hex: '#6B8E23' },
+  { id: 'Y06', name: 'Moss', hex: '#8A9A5B' },
+  { id: 'Y07', name: 'Fern', hex: '#71BC78' },
+  { id: 'Y08', name: 'Sap', hex: '#507D2A' },
+
+  // Z Series: Specials (Neons, Transparents simulated)
+  { id: 'Z01', name: 'Neon Red', hex: '#FF073A' },
+  { id: 'Z02', name: 'Neon Orange', hex: '#FF5F00' },
+  { id: 'Z03', name: 'Neon Yellow', hex: '#EAFF00' },
+  { id: 'Z04', name: 'Neon Green', hex: '#39FF14' },
+  { id: 'Z05', name: 'Neon Blue', hex: '#00FFFF' },
+  { id: 'Z06', name: 'Neon Purple', hex: '#BC13FE' },
+  { id: 'Z07', name: 'Glow White', hex: '#F0FFF0' },
+  { id: 'Z08', name: 'Clear', hex: '#F0F8FF' },
+];
+
+export const AVAILABLE_PALETTES: Palette[] = [
+  { id: 'perler', name: 'Perler (Standard 60+)', colors: PERLER_COLORS },
+  { id: 'artkal', name: 'Artkal (Full S-Series)', colors: ARTKAL_S_COLORS },
+  { id: 'generic_291', name: 'Generic 291 (Series A-Z)', colors: GENERIC_291_COLORS },
+  { id: 'hama', name: 'Hama Beads', colors: HAMA_COLORS },
+];
+
+// Compatibility export
+export const BEAD_PALETTE = PERLER_COLORS;

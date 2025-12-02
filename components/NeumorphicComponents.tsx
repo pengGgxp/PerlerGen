@@ -44,9 +44,28 @@ export const NeuInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (
       ${BASE_BG} ${SHADOW_IN}
       rounded-xl px-4 py-3 outline-none ${TEXT_COLOR}
       focus:ring-2 focus:ring-slate-300 transition-all
+      placeholder-slate-400
       ${props.className}
     `}
   />
+);
+
+export const NeuSelect: React.FC<React.SelectHTMLAttributes<HTMLSelectElement>> = (props) => (
+  <div className={`relative ${props.className}`}>
+    <select
+      {...props}
+      className={`
+        appearance-none w-full
+        ${BASE_BG} ${SHADOW_IN}
+        rounded-xl px-4 py-3 outline-none ${TEXT_COLOR}
+        focus:ring-2 focus:ring-slate-300 transition-all
+        cursor-pointer
+      `}
+    />
+    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+      <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+    </div>
+  </div>
 );
 
 export const NeuRange: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { label?: string, valueDisplay?: string }> = ({ label, valueDisplay, ...props }) => (
@@ -66,3 +85,22 @@ export const NeuRange: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { 
     </div>
   </div>
 );
+
+export const NeuModal: React.FC<{ isOpen: boolean; onClose: () => void; title: string; children: ReactNode }> = ({ isOpen, onClose, title, children }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-800/30 backdrop-blur-sm">
+      <div className="bg-[#e0e5ec] rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]">
+        <div className="flex justify-between items-center p-6 border-b border-slate-300">
+          <h3 className="text-xl font-bold text-slate-700">{title}</h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div className="p-6 overflow-y-auto custom-scrollbar">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};

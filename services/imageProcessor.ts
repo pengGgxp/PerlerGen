@@ -1,10 +1,11 @@
 import { BeadColor, PatternData } from '../types';
-import { BEAD_PALETTE, hexToRgb, getColorDistance } from '../constants';
+import { hexToRgb, getColorDistance } from '../constants';
 
 export const processImageToPattern = (
   imageSrc: string,
   targetWidth: number,
-  targetHeight: number | 'auto'
+  targetHeight: number | 'auto',
+  palette: BeadColor[]
 ): Promise<PatternData> => {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -37,7 +38,12 @@ export const processImageToPattern = (
       const counts: Record<string, number> = {};
 
       // Pre-calculate RGB for palette
-      const paletteRgb = BEAD_PALETTE.map(p => ({ ...p, rgb: hexToRgb(p.hex) }));
+      const paletteRgb = palette.map(p => ({ ...p, rgb: hexToRgb(p.hex) }));
+
+      if (paletteRgb.length === 0) {
+        reject(new Error("No colors in palette"));
+        return;
+      }
 
       for (let y = 0; y < finalHeight; y++) {
         const row: BeadColor[] = [];
@@ -50,11 +56,16 @@ export const processImageToPattern = (
 
           // Simple handling for transparency
           if (a < 128) {
-             // Treat as transparent/no bead. 
-             // We'll use a placeholder "None" bead or just skip. 
-             // For this app, let's just map to White if transparent, or maybe closest.
-             // Let's assume white background for transparency for now.
-             // Better: Use a specific ID for empty if needed, but for "materials" let's match to palette.
+             // Treat as transparent. We just map to the first color (usually black or white)
+             // or ideally we skip. But for the grid array we need a value.
+             // We'll map to White or closest lighter color if possible, or just the first one.
+             // Let's assume white for background/transparency if available.
+             const white = paletteRgb.find(c => c.hex.toLowerCase() === '#ffffff') || paletteRgb[0];
+             const matchedBead: BeadColor = { id: white.id, name: white.name, hex: white.hex };
+             row.push(matchedBead);
+             // Optionally don't count it if it's "background", but for now we count everything.
+             counts[matchedBead.id] = (counts[matchedBead.id] || 0) + 1;
+             continue;
           }
 
           const currentPixel = { r, g, b };
