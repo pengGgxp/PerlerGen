@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => {
   return {
     base: "./", // 设置基础路径，确保构建后可以使用相对路径访问
     server: {
-      port: 3000,
+      port: 3002,
       host: "0.0.0.0",
     },
     plugins: [react()],

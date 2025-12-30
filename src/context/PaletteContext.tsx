@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Palette, BeadColor } from '../types';
-import { AVAILABLE_PALETTES } from '../constants';
+import { AVAILABLE_PALETTES } from '../beadPalettes';
 
 interface PaletteContextType {
   allPalettes: Palette[];

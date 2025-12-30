@@ -1,5 +1,5 @@
 import { BeadColor, PatternData } from '../types';
-import { hexToRgb, getColorDistance } from '../constants';
+import { hexToRgb, getColorDistance } from '../beadPalettes';
 
 export const processImageToPattern = (
   imageSrc: string,

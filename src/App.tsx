@@ -7,7 +7,7 @@ import { drawPatternToCanvas, drawMaterialListToCanvas } from './services/export
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { PatternData, AIAnalysis, BeadColor } from './types';
-// import { AVAILABLE_PALETTES } from './constants'; // Removed: Used from Context
+
 import { translations, Language } from './translations';
 import { usePalette } from './context/PaletteContext';
 import { parsePaletteCSV } from './services/csvUtils';
