@@ -34,7 +34,7 @@ const App = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [showGridLines, setShowGridLines] = useState(true);
+  const [beadShape, setBeadShape] = useState<'round' | 'square'>('round');
 
   // CSV Import State
   const [showCsvModal, setShowCsvModal] = useState(false);
@@ -283,7 +283,7 @@ const App = () => {
           if (hiddenBeadIds.has(bead.id)) return;
 
           ctx.fillStyle = bead.hex;
-          if (showGridLines) {
+          if (beadShape === 'round') {
              ctx.beginPath();
              ctx.arc(
                x * cellSize + cellSize / 2, 
@@ -299,7 +299,7 @@ const App = () => {
         });
       });
     }
-  }, [patternData, showGridLines, hiddenBeadIds]);
+  }, [patternData, beadShape, hiddenBeadIds]);
 
   // Zoom and Pan Handlers
   // Use ref to attach non-passive listener to prevent default scroll behavior
@@ -457,7 +457,7 @@ const App = () => {
       startY: 0,
       width: patternData.width,
       height: patternData.height,
-      showGridLines,
+      beadShape,
       hiddenBeadIds,
       title: `${t.appTitle} - ${patternData.width}x${patternData.height}`
     });
@@ -494,7 +494,7 @@ const App = () => {
              startY,
              width: currentWidth,
              height: currentHeight,
-             showGridLines,
+             beadShape,
              hiddenBeadIds,
              title: `Part ${r + 1}-${c + 1} (Row ${r+1}, Col ${c+1})`
            });
@@ -647,18 +647,21 @@ const App = () => {
                 </div>
 
                 <div className="flex justify-between items-center px-2 py-1">
-                   <label className="text-sm font-bold text-slate-500">{t.circularBeads}</label>
-                   <div className="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-                        <input 
-                            type="checkbox" 
-                            name="toggle" 
-                            id="toggle" 
-                            checked={showGridLines}
-                            onChange={(e) => setShowGridLines(e.target.checked)}
-                            className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer checked:right-0 right-5 transition-all duration-300 shadow-sm"
-                        />
-                        <label htmlFor="toggle" className={`toggle-label block overflow-hidden h-5 rounded-full cursor-pointer shadow-inner ${showGridLines ? 'bg-slate-300' : 'bg-slate-200'}`}></label>
-                    </div>
+                   <label className="text-sm font-bold text-slate-500">{t.beadShape}</label>
+                   <div className="flex bg-slate-200 rounded-lg p-1 shadow-inner">
+                        <button 
+                            onClick={() => setBeadShape('square')}
+                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${beadShape === 'square' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            {t.shapeSquare}
+                        </button>
+                        <button 
+                            onClick={() => setBeadShape('round')}
+                            className={`px-3 py-1 rounded-md text-xs font-bold transition-all ${beadShape === 'round' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                            {t.shapeRound}
+                        </button>
+                   </div>
                 </div>
 
                 <div className="pt-2">

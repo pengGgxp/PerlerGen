@@ -8,7 +8,7 @@ interface DrawOptions {
   cellSize?: number;
   margin?: number;
   title?: string;
-  showGridLines: boolean; // This actually means "show circular beads" in the app context
+  beadShape: "round" | "square";
   hiddenBeadIds: Set<string>;
 }
 
@@ -24,7 +24,7 @@ export const drawPatternToCanvas = (
     cellSize = 20,
     margin = 35,
     title,
-    showGridLines, // effectively "circular beads" toggle
+    beadShape,
     hiddenBeadIds,
   } = options;
 
@@ -104,7 +104,7 @@ export const drawPatternToCanvas = (
 
       if (!hiddenBeadIds.has(bead.id)) {
         ctx.fillStyle = bead.hex;
-        if (showGridLines) {
+        if (beadShape === "round") {
           // Draw Circular Bead
           ctx.beginPath();
           ctx.arc(
