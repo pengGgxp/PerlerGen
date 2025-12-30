@@ -298,6 +298,42 @@ const App = () => {
           }
         });
       });
+
+      // Overlay Grid (Inverted) - Match Export Style
+      ctx.save();
+      ctx.globalCompositeOperation = 'difference';
+      ctx.strokeStyle = '#FFFFFF';
+
+      // Vertical
+      for (let x = 0; x <= patternData.width; x++) {
+        let lineWidth = 0;
+        if (x % 10 === 0) lineWidth = 1.5; // Slightly thinner for screen
+        else if (x % 5 === 0) lineWidth = 0.5;
+        
+        if (lineWidth > 0) {
+           ctx.lineWidth = lineWidth;
+           ctx.beginPath();
+           ctx.moveTo(x * cellSize, 0);
+           ctx.lineTo(x * cellSize, canvas.height);
+           ctx.stroke();
+        }
+      }
+
+      // Horizontal
+      for (let y = 0; y <= patternData.height; y++) {
+        let lineWidth = 0;
+        if (y % 10 === 0) lineWidth = 1.5;
+        else if (y % 5 === 0) lineWidth = 0.5;
+        
+        if (lineWidth > 0) {
+           ctx.lineWidth = lineWidth;
+           ctx.beginPath();
+           ctx.moveTo(0, y * cellSize);
+           ctx.lineTo(canvas.width, y * cellSize);
+           ctx.stroke();
+        }
+      }
+      ctx.restore();
     }
   }, [patternData, beadShape, hiddenBeadIds]);
 

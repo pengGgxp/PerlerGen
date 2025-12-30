@@ -146,15 +146,24 @@ export const drawPatternToCanvas = (
     }
   }
 
-  // Draw Thicker Lines for 10x10 blocks relative to absolute
-  ctx.strokeStyle = "#94a3b8"; // Slate-400
-  ctx.lineWidth = 2;
+  // Overlay Grid System (Inverted Colors)
+  ctx.save();
+  ctx.globalCompositeOperation = "difference";
+  ctx.strokeStyle = "#FFFFFF"; // White in difference mode = Invert underlying color
 
-  // Vertical lines
+  // Vertical Lines
   for (let x = 0; x <= width; x++) {
     const absX = startX + x;
-    if (absX % 10 === 0 && absX !== 0) {
-      // Don't draw on 0 if not needed, but here x is relative
+    let lineWidth = 0;
+
+    if (absX % 10 === 0) {
+      lineWidth = 2.5; // Bold line for 10s
+    } else if (absX % 5 === 0) {
+      lineWidth = 1; // Thin line for 5s
+    }
+
+    if (lineWidth > 0) {
+      ctx.lineWidth = lineWidth;
       ctx.beginPath();
       ctx.moveTo(x * cellSize, 0);
       ctx.lineTo(x * cellSize, height * cellSize);
@@ -162,18 +171,30 @@ export const drawPatternToCanvas = (
     }
   }
 
-  // Horizontal lines
+  // Horizontal Lines
   for (let y = 0; y <= height; y++) {
     const absY = startY + y;
-    if (absY % 10 === 0 && absY !== 0) {
+    let lineWidth = 0;
+
+    if (absY % 10 === 0) {
+      lineWidth = 2.5; // Bold line for 10s
+    } else if (absY % 5 === 0) {
+      lineWidth = 1; // Thin line for 5s
+    }
+
+    if (lineWidth > 0) {
+      ctx.lineWidth = lineWidth;
       ctx.beginPath();
       ctx.moveTo(0, y * cellSize);
       ctx.lineTo(width * cellSize, y * cellSize);
       ctx.stroke();
     }
   }
+  ctx.restore();
 
-  // Always draw border around the chunk
+  // Always draw border around the chunk (in standard color)
+  ctx.strokeStyle = "#94a3b8";
+  ctx.lineWidth = 2;
   ctx.strokeRect(0, 0, width * cellSize, height * cellSize);
 
   return canvas;

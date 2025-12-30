@@ -4,6 +4,7 @@ import { HAMA_COLORS } from "./beads/hama";
 import { ARTKAL_S_COLORS } from "./beads/artkal";
 import { GENERIC_291_COLORS } from "./beads/generic291";
 import { PERLER_221_COLORS } from "./beads/perler221";
+import { MARD_221_COLORS } from "./beads/mard";
 
 // Re-export colors and utils
 export { PERLER_COLORS } from "./beads/perler";
@@ -11,9 +12,15 @@ export { HAMA_COLORS } from "./beads/hama";
 export { ARTKAL_S_COLORS } from "./beads/artkal";
 export { GENERIC_291_COLORS } from "./beads/generic291";
 export { PERLER_221_COLORS } from "./beads/perler221";
+export { MARD_221_COLORS } from "./beads/mard";
 export { hexToRgb, getColorDistance } from "./beads/utils";
 
 export const AVAILABLE_PALETTES: Palette[] = [
+  {
+    id: "mard_221",
+    name: "Mard Beads (221 Colors) / M豆221色",
+    colors: MARD_221_COLORS,
+  },
   {
     id: "perler",
     name: "Perler (Standard 60+) / 拼拼豆豆",
