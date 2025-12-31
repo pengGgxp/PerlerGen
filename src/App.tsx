@@ -12,6 +12,7 @@ import { translations, Language } from './translations';
 import { usePalette } from './context/PaletteContext';
 import { parsePaletteCSV } from './services/csvUtils';
 import { ImageCropper } from './components/ImageCropper';
+import { FreeDrawEditor } from './components/FreeDrawEditor';
 
 const App = () => {
   const [language, setLanguage] = useState<Language>('zh'); // Default to Chinese
@@ -73,6 +74,9 @@ const App = () => {
   // Material Export State
   const [showMaterialExportModal, setShowMaterialExportModal] = useState(false);
   const [excludeHiddenMaterials, setExcludeHiddenMaterials] = useState(true);
+
+  // Free Draw State
+  const [isFreeDrawMode, setIsFreeDrawMode] = useState(false);
 
   // Derived state for active palette - MOVED TO CONTEXT
   // const activePalette = AVAILABLE_PALETTES.find(p => p.id === selectedPaletteId) || AVAILABLE_PALETTES[0];
@@ -268,6 +272,17 @@ const App = () => {
     
     setPickingColorFor(null);
     setColorSearch('');
+  };
+
+  const handleFreeDrawSave = (newGrid: BeadColor[][]) => {
+    if (!patternData) return;
+    const newCounts = recalculateCounts(newGrid);
+    setPatternData({
+      ...patternData,
+      grid: newGrid,
+      counts: newCounts
+    });
+    setIsFreeDrawMode(false);
   };
 
   // AI Analysis Handler
@@ -929,6 +944,14 @@ const App = () => {
                </NeuButton>
 
                <NeuButton 
+                  onClick={() => setIsFreeDrawMode(true)}
+                  className="flex items-center gap-2 shadow-lg bg-blue-100 text-blue-700 hover:text-blue-900"
+               >
+                 <span className="text-lg">🎨</span>
+                 {t.freeDrawBtn}
+               </NeuButton>
+
+               <NeuButton 
                   onClick={handleDownload}
                   className="flex items-center gap-2 shadow-lg"
                >
@@ -1124,6 +1147,17 @@ const App = () => {
           imageSrc={originalImageSrc}
           onConfirm={handleCropConfirm}
           onCancel={handleCropCancel}
+          t={t}
+        />
+      )}
+
+      {/* Free Draw Editor */}
+      {isFreeDrawMode && patternData && (
+        <FreeDrawEditor
+          patternData={patternData}
+          palette={activePalette.colors}
+          onSave={handleFreeDrawSave}
+          onCancel={() => setIsFreeDrawMode(false)}
           t={t}
         />
       )}
