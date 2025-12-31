@@ -11,6 +11,7 @@ import { PatternData, AIAnalysis, BeadColor } from './types';
 import { translations, Language } from './translations';
 import { usePalette } from './context/PaletteContext';
 import { parsePaletteCSV } from './services/csvUtils';
+import { ImageCropper } from './components/ImageCropper';
 
 const App = () => {
   const [language, setLanguage] = useState<Language>('zh'); // Default to Chinese
@@ -20,6 +21,8 @@ const App = () => {
   const { allPalettes, selectedPaletteId, activePalette, setSelectedPaletteId, addCustomPalette, removeCustomPalette } = usePalette();
 
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
+  const [isCropping, setIsCropping] = useState(false);
   
   // Grid Dimensions State
   const [gridWidth, setGridWidth] = useState<number>(29);
@@ -81,12 +84,16 @@ const App = () => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
-        setImageSrc(result);
+        setOriginalImageSrc(result);
+        setIsCropping(true); // Trigger crop flow
+        
+        // Reset states
         setPatternData(null); 
         setAiAnalysis(null);
         setHiddenBeadIds(new Set()); 
         setZoom(1);
         setPan({ x: 0, y: 0 });
+        setImageSrc(null); // Clear current processed image until crop is done
       };
       reader.readAsDataURL(file);
     }
@@ -120,6 +127,18 @@ const App = () => {
           }
       };
       reader.readAsText(csvFile);
+  };
+
+  const handleCropConfirm = (croppedSrc: string) => {
+    setImageSrc(croppedSrc);
+    setIsCropping(false);
+  };
+
+  const handleCropCancel = () => {
+    if (originalImageSrc) {
+        setImageSrc(originalImageSrc);
+    }
+    setIsCropping(false);
   };
 
   // When image loads, calculate aspect ratio and reset height
@@ -1098,6 +1117,16 @@ const App = () => {
           </div>
         </div>
       </NeuModal>
+
+      {/* Image Cropper */}
+      {isCropping && originalImageSrc && (
+        <ImageCropper
+          imageSrc={originalImageSrc}
+          onConfirm={handleCropConfirm}
+          onCancel={handleCropCancel}
+          t={t}
+        />
+      )}
 
       {/* Donation Modal */}
       <NeuModal

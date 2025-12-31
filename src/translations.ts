@@ -64,6 +64,12 @@ export const translations = {
     footerBuyMeCoffee: "Buy me a milk tea",
     footerBlog: "My Blog",
     donationModalTitle: "Support the Developer",
+    // Crop
+    cropTitle: "Crop Image",
+    cropConfirm: "Confirm Crop",
+    cropCancel: "Cancel",
+    cropError: "Cropping failed, using original image.",
+    cropImageAlt: "Image to crop",
   },
   zh: {
     appTitle: "拼豆生成器",
@@ -129,5 +135,11 @@ export const translations = {
     footerBuyMeCoffee: "给我买杯奶茶",
     footerBlog: "我的博客",
     donationModalTitle: "支持开发者",
+    // Crop
+    cropTitle: "裁剪图片",
+    cropConfirm: "确认裁剪",
+    cropCancel: "取消",
+    cropError: "裁剪失败，将使用原图。",
+    cropImageAlt: "待裁剪图片",
   },
 };
