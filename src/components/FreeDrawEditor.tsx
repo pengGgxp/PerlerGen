@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { NeuCard, NeuButton, NeuSelect } from './NeumorphicComponents';
+import { NeuCard, NeuButton, NeuSelect, NeuModal } from './NeumorphicComponents';
 import { BeadColor, PatternData } from '../types';
 import { translations } from '../translations';
 
@@ -45,6 +45,35 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
 
+  // Touch State
+  const lastTouchDistance = useRef<number | null>(null);
+  const lastTouchCenter = useRef<{ x: number, y: number } | null>(null);
+
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showEraserPicker, setShowEraserPicker] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [popoverCoords, setPopoverCoords] = useState({ x: 0, bottom: 0 });
+
+  const toggleColorPicker = (e: React.MouseEvent) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setPopoverCoords({
+          x: rect.left + rect.width / 2,
+          bottom: window.innerHeight - rect.top + 8
+      });
+      setShowColorPicker(!showColorPicker);
+      setShowEraserPicker(false);
+  };
+
+  const toggleEraserPicker = (e: React.MouseEvent) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setPopoverCoords({
+          x: rect.left + rect.width / 2,
+          bottom: window.innerHeight - rect.top + 8
+      });
+      setShowEraserPicker(!showEraserPicker);
+      setShowColorPicker(false);
+  };
+
   // Initialize History
   useEffect(() => {
     if (history.length === 0) {
@@ -87,9 +116,12 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
+    const currentHeight = grid.length;
+    const currentWidth = grid.length > 0 ? grid[0].length : 0;
+
     const cellSize = 20 * zoom;
-    const width = patternData.width * cellSize;
-    const height = patternData.height * cellSize;
+    const width = currentWidth * cellSize;
+    const height = currentHeight * cellSize;
 
     canvas.width = canvas.parentElement?.clientWidth || 800;
     canvas.height = canvas.parentElement?.clientHeight || 600;
@@ -115,14 +147,14 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
     ctx.lineWidth = 1;
     
     // Vertical
-    for (let x = 0; x <= patternData.width; x++) {
+    for (let x = 0; x <= currentWidth; x++) {
       ctx.beginPath();
       ctx.moveTo(x * cellSize, 0);
       ctx.lineTo(x * cellSize, height);
       ctx.stroke();
     }
     // Horizontal
-    for (let y = 0; y <= patternData.height; y++) {
+    for (let y = 0; y <= currentHeight; y++) {
       ctx.beginPath();
       ctx.moveTo(0, y * cellSize);
       ctx.lineTo(width, y * cellSize);
@@ -130,19 +162,19 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
     }
 
     ctx.restore();
-  }, [grid, patternData, zoom, pan]);
+  }, [grid, zoom, pan]);
 
   useEffect(() => {
     requestAnimationFrame(drawCanvas);
   }, [drawCanvas]);
 
   // Tool Logic
-  const getGridPos = (e: React.MouseEvent) => {
+  const getGridPos = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left - pan.x;
-    const y = e.clientY - rect.top - pan.y;
+    const x = clientX - rect.left - pan.x;
+    const y = clientY - rect.top - pan.y;
     const cellSize = 20 * zoom;
     
     const gridX = Math.floor(x / cellSize);
@@ -154,6 +186,52 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
     return null;
   };
 
+  const handleToolAction = (clientX: number, clientY: number, isClick: boolean = false) => {
+      const pos = getGridPos(clientX, clientY);
+      if (!pos) return;
+
+      if (isClick) {
+        if (selectedTool === 'picker') {
+            const bead = grid[pos.y][pos.x];
+            setSelectedColor(bead);
+            setSelectedTool('pencil'); 
+            return;
+        }
+
+        if (selectedTool === 'bucket') {
+            const targetColor = grid[pos.y][pos.x];
+            const replaceColor = selectedColor;
+            
+            if (targetColor.id === replaceColor.id) return;
+
+            const newGrid = grid.map(row => [...row]);
+            const stack = [{x: pos.x, y: pos.y}];
+            const visited = new Set<string>();
+            
+            while (stack.length > 0) {
+                const {x, y} = stack.pop()!;
+                const key = `${x},${y}`;
+                if (visited.has(key)) continue;
+                visited.add(key);
+
+                if (newGrid[y][x].id === targetColor.id) {
+                    newGrid[y][x] = replaceColor;
+                    
+                    if (x > 0) stack.push({x: x-1, y});
+                    if (x < patternData.width - 1) stack.push({x: x+1, y});
+                    if (y > 0) stack.push({x, y: y-1});
+                    if (y < patternData.height - 1) stack.push({x, y: y+1});
+                }
+            }
+            pushToHistory(newGrid);
+            return;
+        }
+      }
+
+      setIsDrawing(true);
+      applyTool(pos.x, pos.y);
+  };
+
   const handleMouseDown = (e: React.MouseEvent) => {
     // Middle click or Space+Click for panning
     if (e.button === 1 || (e.button === 0 && e.shiftKey)) {
@@ -162,48 +240,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
       return;
     }
 
-    const pos = getGridPos(e);
-    if (!pos) return;
-
-    if (selectedTool === 'picker') {
-      const bead = grid[pos.y][pos.x];
-      setSelectedColor(bead);
-      setSelectedTool('pencil'); // Switch back to pencil after picking
-      return;
-    }
-
-    if (selectedTool === 'bucket') {
-        const targetColor = grid[pos.y][pos.x];
-        const replaceColor = selectedColor;
-        
-        if (targetColor.id === replaceColor.id) return;
-
-        const newGrid = grid.map(row => [...row]);
-        const stack = [{x: pos.x, y: pos.y}];
-        const visited = new Set<string>();
-        
-        while (stack.length > 0) {
-            const {x, y} = stack.pop()!;
-            const key = `${x},${y}`;
-            if (visited.has(key)) continue;
-            visited.add(key);
-
-            if (newGrid[y][x].id === targetColor.id) {
-                newGrid[y][x] = replaceColor;
-                
-                // Neighbors
-                if (x > 0) stack.push({x: x-1, y});
-                if (x < patternData.width - 1) stack.push({x: x+1, y});
-                if (y > 0) stack.push({x, y: y-1});
-                if (y < patternData.height - 1) stack.push({x, y: y+1});
-            }
-        }
-        pushToHistory(newGrid);
-        return;
-    }
-
-    setIsDrawing(true);
-    applyTool(pos.x, pos.y);
+    handleToolAction(e.clientX, e.clientY, true);
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -216,7 +253,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
     }
 
     if (isDrawing) {
-      const pos = getGridPos(e);
+      const pos = getGridPos(e.clientX, e.clientY);
       if (pos) {
         applyTool(pos.x, pos.y);
       }
@@ -232,6 +269,58 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
           pushToHistory(grid);
       }
     }
+    // Reset touch state
+    lastTouchDistance.current = null;
+    lastTouchCenter.current = null;
+  };
+
+  // Touch Handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+      // Prevent default to stop scrolling
+      // Note: Might need CSS touch-action: none on canvas
+      if (e.touches.length === 1) {
+          const touch = e.touches[0];
+          handleToolAction(touch.clientX, touch.clientY, true);
+      } else if (e.touches.length === 2) {
+          const dist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+          );
+          lastTouchDistance.current = dist;
+          
+          const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          lastTouchCenter.current = { x: centerX, y: centerY };
+      }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+      if (e.touches.length === 1 && isDrawing) {
+          const touch = e.touches[0];
+          handleToolAction(touch.clientX, touch.clientY, false);
+      } else if (e.touches.length === 2) {
+          const dist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+          );
+          const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+          if (lastTouchDistance.current !== null && lastTouchCenter.current !== null) {
+              // Zoom
+              const deltaDist = dist - lastTouchDistance.current;
+              const zoomSensitivity = 0.005;
+              setZoom(prev => Math.min(Math.max(0.1, prev + deltaDist * zoomSensitivity), 5));
+
+              // Pan
+              const deltaX = centerX - lastTouchCenter.current.x;
+              const deltaY = centerY - lastTouchCenter.current.y;
+              setPan(prev => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
+          }
+
+          lastTouchDistance.current = dist;
+          lastTouchCenter.current = { x: centerX, y: centerY };
+      }
   };
 
   const applyTool = (x: number, y: number) => {
@@ -259,84 +348,227 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
       setZoom(prev => Math.min(Math.max(0.1, prev - e.deltaY * zoomSensitivity), 5));
   };
 
+  // Image Actions
+  const handleFlipH = () => {
+      const newGrid = grid.map(row => [...row].reverse());
+      pushToHistory(newGrid);
+  };
+
+  const handleFlipV = () => {
+      const newGrid = [...grid].reverse();
+      pushToHistory(newGrid);
+  };
+
+  const handleRotate = () => {
+      if (grid.length === 0) return;
+      const rows = grid.length;
+      const cols = grid[0].length;
+      // Rotate 90 deg clockwise
+      // New dimensions: cols x rows
+      // We need to cast to any to initialize empty array of correct size, then fill
+      // Or safer: map
+      const newGrid: BeadColor[][] = [];
+      for(let x=0; x<cols; x++) {
+          newGrid[x] = [];
+          for(let y=0; y<rows; y++) {
+              newGrid[x][y] = grid[rows - 1 - y][x];
+          }
+      }
+      pushToHistory(newGrid);
+  };
+
+  const handleClear = () => {
+      setShowClearConfirm(true);
+  };
+  
+  const confirmClear = () => {
+     const h = grid.length;
+     const w = grid.length > 0 ? grid[0].length : 0;
+     // Fill with eraser color (usually white)
+     const newGrid = Array.from({ length: h }, () => Array(w).fill(eraserColor)); 
+     pushToHistory(newGrid);
+     setShowClearConfirm(false);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-[#e0e5ec] flex flex-col">
+    <div className="fixed inset-0 z-50 bg-[#e0e5ec] flex flex-col overscroll-none" style={{ height: '100dvh' }}>
       {/* Header */}
-      <div className="p-4 shadow-md flex justify-between items-center bg-[#e0e5ec] z-10">
-        <h2 className="text-xl font-bold text-slate-700">{t.freeDrawTitle}</h2>
-        <div className="flex gap-4">
-          <NeuButton onClick={handleUndo} disabled={historyIndex <= 0}>{t.undo}</NeuButton>
-          <NeuButton onClick={handleRedo} disabled={historyIndex >= history.length - 1}>{t.redo}</NeuButton>
-          <NeuButton onClick={onCancel} className="text-red-500">{t.cancel}</NeuButton>
-          <NeuButton onClick={() => onSave(grid)} className="text-green-600">{t.save}</NeuButton>
+      <div className="p-2 md:p-4 shadow-md flex justify-between items-center bg-[#e0e5ec] z-10 shrink-0">
+        <h2 className="text-lg md:text-xl font-bold text-slate-700">{t.freeDrawTitle}</h2>
+        <div className="flex gap-2 md:gap-4">
+          <NeuButton onClick={handleUndo} disabled={historyIndex <= 0} className="px-3 py-1 text-sm md:text-base md:px-6 md:py-2">{t.undo}</NeuButton>
+          <NeuButton onClick={handleRedo} disabled={historyIndex >= history.length - 1} className="px-3 py-1 text-sm md:text-base md:px-6 md:py-2">{t.redo}</NeuButton>
+          <NeuButton onClick={onCancel} className="text-red-500 px-3 py-1 text-sm md:text-base md:px-6 md:py-2">{t.cancel}</NeuButton>
+          <NeuButton onClick={() => onSave(grid)} className="text-green-600 px-3 py-1 text-sm md:text-base md:px-6 md:py-2">{t.save}</NeuButton>
         </div>
       </div>
 
-      {/* Toolbar */}
-      <div className="flex flex-1 overflow-hidden">
-        <div className="w-64 p-4 flex flex-col gap-4 shadow-lg z-10 bg-[#e0e5ec] overflow-y-auto">
-          <NeuCard className="flex flex-col gap-2">
-            <h3 className="font-bold text-slate-600">{t.tools}</h3>
-            <div className="grid grid-cols-2 gap-2">
-                <NeuButton active={selectedTool === 'pencil'} onClick={() => setSelectedTool('pencil')}>✏️ {t.toolPencil}</NeuButton>
-                <NeuButton active={selectedTool === 'bucket'} onClick={() => setSelectedTool('bucket')}>🪣 {t.toolBucket}</NeuButton>
-                <NeuButton active={selectedTool === 'eraser'} onClick={() => setSelectedTool('eraser')}>🧹 {t.toolEraser}</NeuButton>
-                <NeuButton active={selectedTool === 'picker'} onClick={() => setSelectedTool('picker')}>🖌️ {t.toolPicker}</NeuButton>
-            </div>
-          </NeuCard>
-
-          <NeuCard className="flex flex-col gap-2">
-            <h3 className="font-bold text-slate-600">{t.colors}</h3>
-            <div className="flex flex-wrap gap-1 max-h-40 overflow-y-auto p-1">
-                {palette.map(c => (
-                    <div 
-                        key={c.id}
-                        className={`w-6 h-6 rounded-full cursor-pointer border-2 ${selectedColor.id === c.id ? 'border-blue-500 scale-110' : 'border-transparent'}`}
-                        style={{ backgroundColor: c.hex }}
-                        onClick={() => setSelectedColor(c)}
-                        title={c.name}
-                    />
-                ))}
-            </div>
-            <div className="mt-2 text-sm text-slate-500">
-                {t.currentColor}: {selectedColor.name} ({selectedColor.id})
-            </div>
-          </NeuCard>
-          
-          <NeuCard className="flex flex-col gap-2">
-             <h3 className="font-bold text-slate-600">{t.eraserColor}</h3>
-             <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto p-1">
-                {palette.map(c => (
-                    <div 
-                        key={`eraser-${c.id}`}
-                        className={`w-6 h-6 rounded-full cursor-pointer border-2 ${eraserColor.id === c.id ? 'border-red-500 scale-110' : 'border-transparent'}`}
-                        style={{ backgroundColor: c.hex }}
-                        onClick={() => setEraserColor(c)}
-                        title={c.name}
-                    />
-                ))}
-            </div>
-             <div className="mt-2 text-sm text-slate-500">
-                {t.toolEraser}: {eraserColor.name}
-            </div>
-          </NeuCard>
-        </div>
-
+      {/* Toolbar & Canvas Container */}
+      <div className="flex-1 overflow-hidden relative">
         {/* Canvas Area */}
-        <div className="flex-1 relative bg-slate-200 overflow-hidden cursor-crosshair">
+        <div className="absolute inset-0 z-0 bg-slate-200 overflow-hidden cursor-crosshair touch-none pb-[140px]">
             <canvas 
                 ref={canvasRef}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleMouseUp}
                 onWheel={handleWheel}
-                className="absolute top-0 left-0 w-full h-full"
+                className="absolute top-0 left-0 w-full h-full touch-none"
             />
-             <div className="absolute bottom-4 right-4 bg-white/80 p-2 rounded shadow text-xs">
-                Zoom: {Math.round(zoom * 100)}% | Shift+Click to Pan
+             <div className="absolute top-4 right-4 bg-white/80 p-2 rounded shadow text-xs pointer-events-none select-none z-20">
+                <span className="hidden md:inline">Zoom: {Math.round(zoom * 100)}% | Shift+Click to Pan</span>
+                <span className="md:hidden">Use 2 fingers to Pan/Zoom</span>
             </div>
         </div>
+
+        {/* Toolbar - Fixed at bottom for ALL devices */}
+        <div 
+            className="fixed bottom-0 left-0 right-0 h-auto p-2 md:p-4 flex items-end justify-center gap-2 md:gap-4 z-50 pointer-events-none"
+            style={{ paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}
+        >
+            <div className="bg-[#e0e5ec] shadow-[0_-4px_20px_rgba(0,0,0,0.15)] rounded-2xl p-2 md:p-4 flex gap-2 md:gap-6 overflow-x-auto max-w-full pointer-events-auto items-center">
+                
+                {/* Tools Group */}
+                <div className="flex gap-2 shrink-0">
+                    <NeuButton 
+                        active={selectedTool === 'pencil'} 
+                        onClick={() => setSelectedTool('pencil')} 
+                        className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl"
+                        title={t.toolPencil}
+                    >✏️</NeuButton>
+                    <NeuButton 
+                        active={selectedTool === 'bucket'} 
+                        onClick={() => setSelectedTool('bucket')} 
+                        className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl"
+                        title={t.toolBucket}
+                    >🪣</NeuButton>
+                    <NeuButton 
+                        active={selectedTool === 'picker'} 
+                        onClick={() => setSelectedTool('picker')} 
+                        className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl"
+                        title={t.toolPicker}
+                    >🖌️</NeuButton>
+                </div>
+
+                <div className="w-px h-8 bg-slate-300 mx-1"></div>
+
+                {/* Color Picker with Popover */}
+                <div className="relative shrink-0">
+                    <div 
+                        className={`w-10 h-10 md:w-12 md:h-12 rounded-full cursor-pointer border-4 shadow-inner ${showColorPicker ? 'ring-4 ring-blue-200' : ''}`}
+                        style={{ backgroundColor: selectedColor.hex, borderColor: '#e0e5ec' }}
+                        onClick={toggleColorPicker}
+                        title={t.colors}
+                    />
+                </div>
+
+                <div className="w-px h-8 bg-slate-300 mx-1"></div>
+
+                 {/* Eraser Group */}
+                 <div className="relative flex gap-2 shrink-0 items-center">
+                    <NeuButton 
+                        active={selectedTool === 'eraser'} 
+                        onClick={() => setSelectedTool('eraser')} 
+                        className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl"
+                        title={t.toolEraser}
+                    >🧹</NeuButton>
+                    
+                    {/* Eraser Color Trigger */}
+                    <div 
+                        className={`w-6 h-6 md:w-8 md:h-8 rounded-full cursor-pointer border-2 shadow-sm ${showEraserPicker ? 'ring-2 ring-red-200' : ''}`}
+                        style={{ backgroundColor: eraserColor.hex, borderColor: '#fff' }}
+                        onClick={toggleEraserPicker}
+                        title={t.eraserColor}
+                    />
+                 </div>
+
+                <div className="w-px h-8 bg-slate-300 mx-1"></div>
+
+                {/* Image Actions */}
+                <div className="flex gap-2 shrink-0">
+                    <NeuButton onClick={handleFlipH} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolFlipH}>↔️</NeuButton>
+                    <NeuButton onClick={handleFlipV} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolFlipV}>↕️</NeuButton>
+                    <NeuButton onClick={handleRotate} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolRotate}>🔄</NeuButton>
+                    <NeuButton onClick={handleClear} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl text-red-500" title={t.toolClear}>🗑️</NeuButton>
+                </div>
+            </div>
+        </div>
+
+        {/* Clear Confirmation Modal */}
+        <NeuModal
+            isOpen={showClearConfirm}
+            onClose={() => setShowClearConfirm(false)}
+            title={t.toolClear}
+        >
+            <div className="flex flex-col gap-4">
+                <p className="text-slate-600">{t.clearConfirmText}</p>
+                <div className="flex justify-end gap-2">
+                    <NeuButton onClick={() => setShowClearConfirm(false)}>{t.cancel}</NeuButton>
+                    <NeuButton onClick={confirmClear} className="text-red-500 font-bold">{t.toolClear}</NeuButton>
+                </div>
+            </div>
+        </NeuModal>
+
+        {/* Global Popovers */}
+        {showColorPicker && (
+            <div 
+                className="fixed z-[60] p-4 bg-[#e0e5ec] rounded-xl shadow-xl w-64 md:w-80 flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200"
+                style={{ left: popoverCoords.x, bottom: popoverCoords.bottom, transform: 'translateX(-50%)' }}
+            >
+                <h3 className="font-bold text-slate-600 text-sm">{t.colors}</h3>
+                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1">
+                    {palette.map(c => (
+                        <div 
+                            key={c.id}
+                            className={`w-8 h-8 rounded-full cursor-pointer border-2 ${selectedColor.id === c.id ? 'border-blue-500 scale-110' : 'border-transparent'}`}
+                            style={{ backgroundColor: c.hex }}
+                            onClick={() => {
+                                setSelectedColor(c);
+                                setShowColorPicker(false);
+                            }}
+                            title={`${c.name} (${c.id})`}
+                        />
+                    ))}
+                </div>
+                <div className="text-xs text-slate-500 text-center border-t border-slate-300 pt-2">
+                    {selectedColor.name} ({selectedColor.id})
+                </div>
+                {/* Triangle Arrow */}
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-2 border-8 border-transparent border-t-[#e0e5ec]"></div>
+            </div>
+        )}
+
+        {showEraserPicker && (
+            <div 
+                className="fixed z-[60] p-4 bg-[#e0e5ec] rounded-xl shadow-xl w-64 md:w-80 flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200"
+                style={{ left: popoverCoords.x, bottom: popoverCoords.bottom, transform: 'translateX(-50%)' }}
+            >
+                    <h3 className="font-bold text-slate-600 text-sm">{t.eraserColor}</h3>
+                    <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto p-1">
+                    {palette.map(c => (
+                        <div 
+                            key={`eraser-${c.id}`}
+                            className={`w-8 h-8 rounded-full cursor-pointer border-2 ${eraserColor.id === c.id ? 'border-red-500 scale-110' : 'border-transparent'}`}
+                            style={{ backgroundColor: c.hex }}
+                            onClick={() => {
+                                setEraserColor(c);
+                                setShowEraserPicker(false);
+                            }}
+                            title={`${c.name} (${c.id})`}
+                        />
+                    ))}
+                </div>
+                <div className="text-xs text-slate-500 text-center border-t border-slate-300 pt-2">
+                    {eraserColor.name}
+                </div>
+                    {/* Triangle Arrow */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-2 border-8 border-transparent border-t-[#e0e5ec]"></div>
+            </div>
+        )}
       </div>
     </div>
   );

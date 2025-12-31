@@ -83,6 +83,8 @@ export const translations = {
     toolBucket: "Fill",
     toolEraser: "Erase",
     toolPicker: "Pick",
+    toolClear: "Clear",
+    clearConfirmText: "Are you sure you want to clear the canvas?",
     eraserColor: "Eraser Color",
   },
   zh: {
@@ -168,6 +170,10 @@ export const translations = {
     toolBucket: "油漆桶",
     toolEraser: "橡皮擦",
     toolPicker: "吸管",
+    toolFlipH: "水平翻转",
+    toolFlipV: "垂直翻转",
+    toolRotate: "旋转90°",
+    toolClear: "清空",
     eraserColor: "橡皮擦颜色",
   },
 };

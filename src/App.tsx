@@ -277,11 +277,20 @@ const App = () => {
   const handleFreeDrawSave = (newGrid: BeadColor[][]) => {
     if (!patternData) return;
     const newCounts = recalculateCounts(newGrid);
+    const newHeight = newGrid.length;
+    const newWidth = newGrid.length > 0 ? newGrid[0].length : 0;
+    
     setPatternData({
       ...patternData,
       grid: newGrid,
+      width: newWidth,
+      height: newHeight,
       counts: newCounts
     });
+    // Update gridWidth/gridHeight state as well to stay in sync
+    setGridWidth(newWidth);
+    setGridHeight(newHeight);
+    
     setIsFreeDrawMode(false);
   };
 
