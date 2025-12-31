@@ -40,6 +40,15 @@ const App = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [beadShape, setBeadShape] = useState<'round' | 'square'>('round');
   const [denoiseLevel, setDenoiseLevel] = useState<number>(0);
+  const [appliedDenoiseLevel, setAppliedDenoiseLevel] = useState<number>(0);
+
+  // Debounce Denoise Level
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAppliedDenoiseLevel(denoiseLevel);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [denoiseLevel]);
 
   // CSV Import State
   const [showCsvModal, setShowCsvModal] = useState(false);
@@ -197,7 +206,7 @@ const App = () => {
     if (imageSrc && gridWidth > 0 && gridHeight > 0) {
       setIsProcessing(true);
       const timer = setTimeout(() => {
-        processImageToPattern(imageSrc, gridWidth, gridHeight, activePalette.colors, denoiseLevel)
+        processImageToPattern(imageSrc, gridWidth, gridHeight, activePalette.colors, appliedDenoiseLevel)
           .then((data) => {
             setPatternData(data);
             setIsProcessing(false);
@@ -206,10 +215,10 @@ const App = () => {
             console.error(err);
             setIsProcessing(false);
           });
-      }, 500); // Debounce
+      }, 100); // Small delay to allow UI to update
       return () => clearTimeout(timer);
     }
-  }, [imageSrc, gridWidth, gridHeight, activePalette, denoiseLevel]); // Removed patternData dependency to avoid loops
+  }, [imageSrc, gridWidth, gridHeight, activePalette, appliedDenoiseLevel]); // Use appliedDenoiseLevel
 
   const handleMaterialExport = () => {
     if (!patternData) return;
@@ -748,14 +757,14 @@ const App = () => {
                    <NeuRange
                       label={t.denoiseLevel}
                       min="0"
-                      max="5"
+                      max="10"
                       step="1"
                       value={denoiseLevel}
                       onChange={(e) => setDenoiseLevel(parseInt(e.target.value))}
                       valueDisplay={
                           denoiseLevel === 0 ? t.denoiseNone :
-                          denoiseLevel <= 2 ? t.denoiseLow :
-                          denoiseLevel <= 4 ? t.denoiseMed : t.denoiseHigh
+                          denoiseLevel <= 3 ? t.denoiseLow :
+                          denoiseLevel <= 7 ? t.denoiseMed : t.denoiseHigh
                       }
                    />
                 </div>
@@ -904,6 +913,13 @@ const App = () => {
                     }}
                  >
                     <div className="relative shadow-xl shadow-slate-400/20">
+                        {/* Processing Overlay */}
+                        {isProcessing && (
+                            <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-200/50 backdrop-blur-sm rounded-lg animate-in fade-in duration-200">
+                                <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin shadow-lg"></div>
+                                <span className="mt-4 font-bold text-slate-600 animate-pulse">{t.processing}</span>
+                            </div>
+                        )}
                         {/* Checkerboard background for transparency */}
                         <div className="absolute inset-0 z-0 opacity-20" style={{ 
                             backgroundImage: 'linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)',
