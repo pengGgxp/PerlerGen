@@ -11,6 +11,8 @@ export const translations = {
     ratioLocked: "Ratio Locked",
     ratioUnlocked: "Ratio Unlocked",
     circularBeads: "Circular Beads",
+    shapeRound: "Round Beads",
+    shapeSquare: "Square Beads",
     analyzeBtn: "Get AI Ideas",
     analyzing: "Analyzing...",
     materials: "Materials",
