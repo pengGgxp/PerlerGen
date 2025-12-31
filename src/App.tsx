@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { NeuCard, NeuButton, NeuInput, NeuSelect, NeuModal, NeuFileUpload } from './components/NeumorphicComponents';
+import { NeuCard, NeuButton, NeuInput, NeuSelect, NeuModal, NeuFileUpload, NeuRange } from './components/NeumorphicComponents';
 import { processImageToPattern } from './services/imageProcessor';
 import { analyzeBeadPattern } from './services/gemini';
 import { drawPatternToCanvas, drawMaterialListToCanvas } from './services/exportUtils';
@@ -35,6 +35,7 @@ const App = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [beadShape, setBeadShape] = useState<'round' | 'square'>('round');
+  const [denoiseLevel, setDenoiseLevel] = useState<number>(0);
 
   // CSV Import State
   const [showCsvModal, setShowCsvModal] = useState(false);
@@ -173,7 +174,7 @@ const App = () => {
     if (imageSrc && gridWidth > 0 && gridHeight > 0) {
       setIsProcessing(true);
       const timer = setTimeout(() => {
-        processImageToPattern(imageSrc, gridWidth, gridHeight, activePalette.colors)
+        processImageToPattern(imageSrc, gridWidth, gridHeight, activePalette.colors, denoiseLevel)
           .then((data) => {
             setPatternData(data);
             setIsProcessing(false);
@@ -185,7 +186,7 @@ const App = () => {
       }, 500); // Debounce
       return () => clearTimeout(timer);
     }
-  }, [imageSrc, gridWidth, gridHeight, activePalette]); // Removed patternData dependency to avoid loops
+  }, [imageSrc, gridWidth, gridHeight, activePalette, denoiseLevel]); // Removed patternData dependency to avoid loops
 
   const handleMaterialExport = () => {
     if (!patternData) return;
@@ -698,6 +699,22 @@ const App = () => {
                             {t.shapeRound}
                         </button>
                    </div>
+                </div>
+
+                <div className="flex flex-col gap-1 px-1">
+                   <NeuRange
+                      label={t.denoiseLevel}
+                      min="0"
+                      max="5"
+                      step="1"
+                      value={denoiseLevel}
+                      onChange={(e) => setDenoiseLevel(parseInt(e.target.value))}
+                      valueDisplay={
+                          denoiseLevel === 0 ? t.denoiseNone :
+                          denoiseLevel <= 2 ? t.denoiseLow :
+                          denoiseLevel <= 4 ? t.denoiseMed : t.denoiseHigh
+                      }
+                   />
                 </div>
 
                 <div className="pt-2">
