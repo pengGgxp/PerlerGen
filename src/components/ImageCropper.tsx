@@ -91,16 +91,16 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-      <NeuCard className="bg-slate-200 max-w-7xl w-full h-[90vh] flex flex-col gap-4 overflow-hidden">
-        <div className="flex justify-between items-center border-b border-slate-300 pb-2">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-0 md:p-4">
+      <NeuCard className="bg-slate-200 max-w-7xl w-full h-[100dvh] md:h-[90vh] flex flex-col gap-2 md:gap-4 overflow-hidden rounded-none md:rounded-2xl">
+        <div className="flex justify-between items-center border-b border-slate-300 pb-2 px-4 pt-2 md:pt-0">
             <h2 className="text-xl font-bold text-slate-700">{t.cropTitle}</h2>
             <button onClick={onCancel} className="text-slate-500 hover:text-slate-700">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
         </div>
         
-        <div className="flex-1 min-h-0 overflow-auto flex bg-slate-800/10 rounded-lg p-4">
+        <div className="flex-1 min-h-0 overflow-auto flex bg-slate-800/10 rounded-lg p-2 md:p-4">
             <ReactCrop 
                 crop={crop} 
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
@@ -112,12 +112,15 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
                     src={imageSrc} 
                     alt={t.cropImageAlt}
                     onLoad={onImageLoad}
-                    className="max-w-full max-h-[calc(90vh-160px)] object-contain"
+                    className="max-w-full max-h-[calc(100dvh-180px)] md:max-h-[calc(90vh-160px)] object-contain"
                 />
             </ReactCrop>
         </div>
 
-        <div className="flex justify-end gap-4 pt-2">
+        <div 
+            className="flex justify-end gap-4 pt-2 px-4 pb-4 md:pb-0"
+            style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+        >
             <NeuButton onClick={onCancel} className="bg-slate-300 text-slate-600 hover:bg-slate-400">
                 {t.cropCancel}
             </NeuButton>
