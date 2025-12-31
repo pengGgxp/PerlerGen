@@ -93,12 +93,20 @@ export const NeuFileUpload: React.FC<{ onChange: (e: React.ChangeEvent<HTMLInput
     fileInputRef.current?.click();
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e);
+    // Clear the input value to allow selecting the same file again
+    if (e.target) {
+        e.target.value = '';
+    }
+  };
+
   return (
     <div className={className}>
       <input
         type="file"
         ref={fileInputRef}
-        onChange={onChange}
+        onChange={handleChange}
         accept={accept}
         className="hidden"
       />
