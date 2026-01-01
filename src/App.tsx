@@ -854,6 +854,38 @@ const App = () => {
                    </div>
                 </div>
 
+                {/* Pattern Options: Mirror & Dual Export */}
+                <div className="flex flex-col gap-3 px-1 py-2 border-t border-slate-300/50 border-b border-slate-300/50">
+                   {/* Mirror Flip */}
+                   <div className="flex items-center justify-between" title={t.mirrorFlipTooltip}>
+                      <div className="flex items-center gap-1 cursor-help">
+                         <label className="text-sm font-bold text-slate-500">{t.mirrorFlip}</label>
+                         <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </div>
+                      <NeuButton 
+                         onClick={handleMirrorFlip}
+                         className="!py-1.5 !px-3 text-xs flex items-center gap-1"
+                      >
+                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                      </NeuButton>
+                   </div>
+
+                   {/* Dual Export */}
+                   <div className="flex items-center justify-between" title={t.dualExportTooltip}>
+                      <div className="flex items-center gap-1 cursor-help">
+                         <label htmlFor="dualExportConfig" className="text-sm font-bold text-slate-500 cursor-pointer">{t.dualExport}</label>
+                         <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        id="dualExportConfig"
+                        checked={isDualExport} 
+                        onChange={(e) => setIsDualExport(e.target.checked)}
+                        className="w-5 h-5 text-purple-600 rounded border-slate-300 focus:ring-purple-500 cursor-pointer shadow-sm bg-slate-100"
+                      />
+                   </div>
+                </div>
+
                 <div className="flex flex-col gap-1 px-1">
                    <NeuRange
                       label={t.denoiseLevel}
@@ -1060,30 +1092,6 @@ const App = () => {
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                  {t.exportMaterials}
                </NeuButton>
-
-               <NeuButton 
-                  onClick={handleMirrorFlip}
-                  className="flex items-center gap-2 shadow-lg bg-slate-100 text-slate-600 hover:text-slate-800"
-                  title={t.mirrorFlip}
-               >
-                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
-                 {t.mirrorFlip}
-               </NeuButton>
-
-               {/* Dual Export Toggle */}
-               <div className="flex items-center gap-2 px-3 py-2 bg-slate-200/50 rounded-xl shadow-inner border border-white/50">
-                  <input 
-                    type="checkbox" 
-                    id="dualExportToggle"
-                    checked={isDualExport} 
-                    onChange={(e) => setIsDualExport(e.target.checked)}
-                    className="w-5 h-5 text-purple-600 rounded border-slate-300 focus:ring-purple-500 cursor-pointer shadow-sm"
-                  />
-                  <label htmlFor="dualExportToggle" className="text-sm font-bold text-slate-600 cursor-pointer select-none flex items-center gap-1">
-                    <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                    {t.dualExport}
-                  </label>
-               </div>
 
                <NeuButton 
                   onClick={() => setShowSplitModal(true)}

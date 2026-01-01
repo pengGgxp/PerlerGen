@@ -71,7 +71,11 @@ export const translations = {
     cropError: "Cropping failed, using original image.",
     cropImageAlt: "Image to crop",
     mirrorFlip: "Mirror Flip",
+    mirrorFlipTooltip:
+      "Flip horizontally. Useful for text/numbers when ironing on the back side.",
     dualExport: "Dual Export (Co-op)",
+    dualExportTooltip:
+      "Generate rotated text for face-to-face cooperation (P2 sits opposite).",
     // Free Draw
     freeDrawBtn: "Free Draw",
     freeDrawTitle: "Free Draw Editor",
@@ -160,7 +164,10 @@ export const translations = {
     cropError: "裁剪失败，将使用原图。",
     cropImageAlt: "裁剪图片",
     mirrorFlip: "镜像翻转",
+    mirrorFlipTooltip: "水平翻转。适用于单面烫豆时，防止文字/数字变成镜像。",
     dualExport: "双人导出 (面对面)",
+    dualExportTooltip:
+      "生成文字旋转180°的图纸，适合两人面对面合作拼豆（P2坐在对面）。",
     // Free Draw
     freeDrawBtn: "任意画",
     freeDrawTitle: "任意画编辑模式",
