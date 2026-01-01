@@ -70,6 +70,7 @@ export const translations = {
     cropCancel: "Cancel",
     cropError: "Cropping failed, using original image.",
     cropImageAlt: "Image to crop",
+    mirrorFlip: "Mirror Flip",
     // Free Draw
     freeDrawBtn: "Free Draw",
     freeDrawTitle: "Free Draw Editor",
@@ -156,7 +157,8 @@ export const translations = {
     cropConfirm: "确认裁剪",
     cropCancel: "取消",
     cropError: "裁剪失败，将使用原图。",
-    cropImageAlt: "待裁剪图片",
+    cropImageAlt: "裁剪图片",
+    mirrorFlip: "镜像翻转",
     // Free Draw
     freeDrawBtn: "任意画",
     freeDrawTitle: "任意画编辑模式",
