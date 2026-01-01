@@ -80,6 +80,9 @@ const App = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [showDonationModal, setShowDonationModal] = useState(false);
   
+  // Dual Export State
+  const [isDualExport, setIsDualExport] = useState(false);
+
   // Material Export State
   const [showMaterialExportModal, setShowMaterialExportModal] = useState(false);
   const [excludeHiddenMaterials, setExcludeHiddenMaterials] = useState(true);
@@ -555,6 +558,11 @@ const App = () => {
   const handleDownload = () => {
     if (!patternData) return;
 
+    if (isDualExport) {
+        handleDualExport();
+        return;
+    }
+
     const canvas = drawPatternToCanvas(patternData, {
       startX: 0,
       startY: 0,
@@ -599,13 +607,36 @@ const App = () => {
              height: currentHeight,
              beadShape,
              hiddenBeadIds,
-             title: `Part ${r + 1}-${c + 1} (Row ${r+1}, Col ${c+1})`
+             title: isDualExport 
+                ? `P1 - ${t.appTitle} (${r + 1}-${c + 1})`
+                : `${t.appTitle} - ${r + 1}-${c + 1}`
            });
 
            if (canvas) {
              const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve));
              if (blob) {
-               zip.file(`pattern_row${r+1}_col${c+1}.png`, blob);
+               zip.file(isDualExport ? `P1_row${r+1}_col${c+1}.png` : `pattern_row${r+1}_col${c+1}.png`, blob);
+             }
+           }
+
+           // If Dual Export is enabled, generate P2 chunk (Rotated Text)
+           if (isDualExport) {
+             const canvasP2 = drawPatternToCanvas(patternData, {
+                startX,
+                startY,
+                width: currentWidth,
+                height: currentHeight,
+                beadShape,
+                hiddenBeadIds,
+                title: `P2 - ${t.appTitle} (${r + 1}-${c + 1})`,
+                rotation: 180
+             });
+
+             if (canvasP2) {
+                const blobP2 = await new Promise<Blob | null>(resolve => canvasP2.toBlob(resolve));
+                if (blobP2) {
+                    zip.file(`P2_row${r+1}_col${c+1}.png`, blobP2);
+                }
              }
            }
         }
@@ -616,6 +647,62 @@ const App = () => {
       setShowSplitModal(false);
     } catch (error) {
       console.error("Export failed", error);
+      alert("Export failed");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDualExport = async () => {
+    if (!patternData) return;
+    setIsExporting(true);
+
+    try {
+      const zip = new JSZip();
+
+      // 1. Normal View (Player 1)
+      const canvas1 = drawPatternToCanvas(patternData, {
+        startX: 0,
+        startY: 0,
+        width: patternData.width,
+        height: patternData.height,
+        beadShape,
+        hiddenBeadIds,
+        title: `${t.appTitle} - P1 (Normal)`
+      });
+
+      if (canvas1) {
+        const blob1 = await new Promise<Blob | null>(resolve => canvas1.toBlob(resolve));
+        if (blob1) zip.file(`pattern_p1_normal.png`, blob1);
+      }
+
+      // 2. Rotated View (Player 2)
+      // Pattern is Unchanged (Original Grid)
+      // Text is Rotated 180 (So P2 can read it when sitting opposite)
+      // When P2 reads the text correctly, the paper is effectively upside down relative to P1.
+      // And the Pattern appears rotated 180 to P1 (which is correct for P2's view).
+      
+      const canvas2 = drawPatternToCanvas(patternData, {
+        startX: 0,
+        startY: 0,
+        width: patternData.width,
+        height: patternData.height,
+        beadShape,
+        hiddenBeadIds,
+        title: `${t.appTitle} - P2 (Face-to-Face 180°)`,
+        rotation: 180
+      });
+
+      if (canvas2) {
+        const blob2 = await new Promise<Blob | null>(resolve => canvas2.toBlob(resolve));
+        if (blob2) zip.file(`pattern_p2_rotated_text.png`, blob2);
+      }
+
+      const content = await zip.generateAsync({ type: "blob" });
+      saveAs(content, "perler-pattern-dual-coop.zip");
+
+    } catch (error) {
+      console.error("Dual export failed", error);
       alert("Export failed");
     } finally {
       setIsExporting(false);
@@ -982,6 +1069,21 @@ const App = () => {
                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
                  {t.mirrorFlip}
                </NeuButton>
+
+               {/* Dual Export Toggle */}
+               <div className="flex items-center gap-2 px-3 py-2 bg-slate-200/50 rounded-xl shadow-inner border border-white/50">
+                  <input 
+                    type="checkbox" 
+                    id="dualExportToggle"
+                    checked={isDualExport} 
+                    onChange={(e) => setIsDualExport(e.target.checked)}
+                    className="w-5 h-5 text-purple-600 rounded border-slate-300 focus:ring-purple-500 cursor-pointer shadow-sm"
+                  />
+                  <label htmlFor="dualExportToggle" className="text-sm font-bold text-slate-600 cursor-pointer select-none flex items-center gap-1">
+                    <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                    {t.dualExport}
+                  </label>
+               </div>
 
                <NeuButton 
                   onClick={() => setShowSplitModal(true)}

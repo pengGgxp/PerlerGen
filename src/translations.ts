@@ -71,6 +71,7 @@ export const translations = {
     cropError: "Cropping failed, using original image.",
     cropImageAlt: "Image to crop",
     mirrorFlip: "Mirror Flip",
+    dualExport: "Dual Export (Co-op)",
     // Free Draw
     freeDrawBtn: "Free Draw",
     freeDrawTitle: "Free Draw Editor",
@@ -159,6 +160,7 @@ export const translations = {
     cropError: "裁剪失败，将使用原图。",
     cropImageAlt: "裁剪图片",
     mirrorFlip: "镜像翻转",
+    dualExport: "双人导出 (面对面)",
     // Free Draw
     freeDrawBtn: "任意画",
     freeDrawTitle: "任意画编辑模式",

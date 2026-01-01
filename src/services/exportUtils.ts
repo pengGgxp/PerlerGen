@@ -10,6 +10,7 @@ interface DrawOptions {
   title?: string;
   beadShape: "round" | "square";
   hiddenBeadIds: Set<string>;
+  rotation?: 0 | 180; // 0 = normal, 180 = rotated text/coords
 }
 
 export const drawPatternToCanvas = (
@@ -26,6 +27,7 @@ export const drawPatternToCanvas = (
     title,
     beadShape,
     hiddenBeadIds,
+    rotation = 0,
   } = options;
 
   const canvasWidth = width * cellSize + margin;
@@ -41,15 +43,20 @@ export const drawPatternToCanvas = (
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-  // Title
+  // If rotation is 180, we rotate the entire context around the center
+  // REMOVED: This rotates the pattern too. We only want to rotate TEXT.
+  /*
+  if (rotation === 180) {
+     ctx.translate(canvasWidth / 2, canvasHeight / 2);
+     ctx.rotate(Math.PI);
+     ctx.translate(-canvasWidth / 2, -canvasHeight / 2);
+  }
+  */
+
+  // Title offset calculation
   let titleOffset = 0;
   if (title) {
     titleOffset = 30;
-    ctx.font = "bold 16px sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillStyle = "#334155"; // Slate-700
-    ctx.fillText(title, canvasWidth / 2, 20);
   }
 
   // Setup Text for coords
@@ -58,12 +65,48 @@ export const drawPatternToCanvas = (
   ctx.textBaseline = "middle";
   ctx.fillStyle = "#64748b"; // Slate-500
 
-  // Draw Top Numbers (Columns) - Absolute coords
+  // Helper to draw text with optional rotation
+  const drawText = (text: string, x: number, y: number) => {
+    ctx.save();
+    ctx.translate(x, y);
+    if (rotation === 180) {
+      ctx.rotate(Math.PI);
+    }
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+  };
+
+  // Draw Title (Override previous simple fillText)
+  if (title) {
+    // Clear the simple title drawn above
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvasWidth, titleOffset);
+
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillStyle = "#334155";
+    // If rotated, title should be at bottom? No, user said "Pattern unchanged".
+    // Title position stays at top, but text itself is upside down?
+    // Or Title moves to bottom?
+    // Usually "Text Rotated" implies the header is now the footer.
+    // But let's stick to "In-place rotation" or "Opposite side labeling".
+    // If P2 holds paper upside down, the "Top" of the image becomes "Bottom".
+    // So we should probably draw the title at the BOTTOM if rotation=180?
+    // No, "Pattern Unchanged" means visual layout is same.
+    // Just the glyphs are rotated.
+    drawText(title, canvasWidth / 2, 20);
+  }
+
+  // Draw Top/Bottom Numbers (Columns)
+  // If rotation=180, maybe we should draw them at the BOTTOM?
+  // Let's stick to strict interpretation: "Pattern Unchanged, Text Rotated".
+  // The numbers stay at the top, but are upside down.
+  ctx.font = "bold 10px sans-serif";
+  ctx.fillStyle = "#64748b";
+
   for (let x = 0; x < width; x++) {
     const absX = startX + x + 1;
-    // Show 1st, last, and every 5th
     if (absX === 1 || absX % 5 === 0 || x === width - 1) {
-      ctx.fillText(
+      drawText(
         `${absX}`,
         margin + x * cellSize + cellSize / 2,
         titleOffset + margin / 2
@@ -71,11 +114,11 @@ export const drawPatternToCanvas = (
     }
   }
 
-  // Draw Left Numbers (Rows) - Absolute coords
+  // Draw Left Numbers (Rows)
   for (let y = 0; y < height; y++) {
     const absY = startY + y + 1;
     if (absY === 1 || absY % 5 === 0 || y === height - 1) {
-      ctx.fillText(
+      drawText(
         `${absY}`,
         margin / 2,
         titleOffset + margin + y * cellSize + cellSize / 2
@@ -137,7 +180,7 @@ export const drawPatternToCanvas = (
         const yiq = (r * 299 + g * 587 + b * 114) / 1000;
         ctx.fillStyle = yiq >= 128 ? "#000000" : "#ffffff";
 
-        ctx.fillText(
+        drawText(
           bead.id,
           x * cellSize + cellSize / 2,
           y * cellSize + cellSize / 2
