@@ -3,9 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { NeuCard, NeuButton, NeuInput, NeuSelect, NeuModal, NeuFileUpload, NeuRange } from './components/NeumorphicComponents';
 import { processImageToPattern } from './services/imageProcessor';
 import { analyzeBeadPattern } from './services/gemini';
-import { drawPatternToCanvas, drawMaterialListToCanvas } from './services/exportUtils';
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
+import { ExportController } from './services/ExportController';
 import { PatternData, AIAnalysis, BeadColor } from './types';
 
 import { translations, Language } from './translations';
@@ -224,25 +222,20 @@ const App = () => {
     }
   }, [imageSrc, gridWidth, gridHeight, activePalette, appliedDenoiseLevel]); // Use appliedDenoiseLevel
 
-  const handleMaterialExport = () => {
+  const handleMaterialExport = async () => {
     if (!patternData) return;
     
-    const canvas = drawMaterialListToCanvas(
+    await ExportController.exportMaterialList({
+        siteLabel,
+        translations: t
+    }, {
         patternData,
-        activePalette.colors,
+        activePaletteColors: activePalette.colors,
         hiddenBeadIds,
-        excludeHiddenMaterials,
-        `${siteLabel} - ${t.materials}`
-    );
+        excludeHiddenMaterials
+    });
 
-    if (canvas) {
-        canvas.toBlob((blob) => {
-            if (blob) {
-                saveAs(blob, `perler-materials-${patternData.width}x${patternData.height}.png`);
-                setShowMaterialExportModal(false);
-            }
-        });
-    }
+    setShowMaterialExportModal(false);
   };
 
   // Helper to recalculate counts after edits
@@ -556,31 +549,26 @@ const App = () => {
   };
 
   // Export with coordinates
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!patternData) return;
-
-    if (isDualExport) {
-        handleDualExport();
-        return;
+    setIsExporting(true);
+    
+    try {
+        await ExportController.handleDownload({
+            siteLabel,
+            translations: t
+        }, {
+            patternData,
+            beadShape,
+            hiddenBeadIds,
+            isDualExport
+        });
+    } catch (error) {
+        console.error("Export failed", error);
+        alert("Export failed");
+    } finally {
+        setIsExporting(false);
     }
-
-    const canvas = drawPatternToCanvas(patternData, {
-      startX: 0,
-      startY: 0,
-      width: patternData.width,
-      height: patternData.height,
-      beadShape,
-      hiddenBeadIds,
-      title: `${siteLabel} - ${patternData.width}x${patternData.height}`
-    });
-
-    if (!canvas) return;
-
-    // Trigger Download
-    const link = document.createElement('a');
-    link.download = `perler-pattern-w${patternData.width}-h${patternData.height}.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
   };
 
   const handleSplitDownload = async () => {
@@ -588,63 +576,17 @@ const App = () => {
     setIsExporting(true);
 
     try {
-      const zip = new JSZip();
-      const { width: chunkW, height: chunkH } = splitConfig;
+      await ExportController.exportSplitPattern({
+        siteLabel,
+        translations: t
+      }, {
+        patternData,
+        beadShape,
+        hiddenBeadIds,
+        splitConfig,
+        isDualExport
+      });
       
-      const rows = Math.ceil(patternData.height / chunkH);
-      const cols = Math.ceil(patternData.width / chunkW);
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-           const startX = c * chunkW;
-           const startY = r * chunkH;
-           const currentWidth = Math.min(chunkW, patternData.width - startX);
-           const currentHeight = Math.min(chunkH, patternData.height - startY);
-
-           const canvas = drawPatternToCanvas(patternData, {
-             startX,
-             startY,
-             width: currentWidth,
-             height: currentHeight,
-             beadShape,
-             hiddenBeadIds,
-             title: isDualExport 
-                ? `P1 - ${siteLabel} (${r + 1}-${c + 1})`
-                : `${siteLabel} - ${r + 1}-${c + 1}`
-           });
-
-           if (canvas) {
-             const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve));
-             if (blob) {
-               zip.file(isDualExport ? `P1_row${r+1}_col${c+1}.png` : `pattern_row${r+1}_col${c+1}.png`, blob);
-             }
-           }
-
-           // If Dual Export is enabled, generate P2 chunk (Rotated Text)
-           if (isDualExport) {
-             const canvasP2 = drawPatternToCanvas(patternData, {
-                startX,
-                startY,
-                width: currentWidth,
-                height: currentHeight,
-                beadShape,
-                hiddenBeadIds,
-                title: `P2 - ${siteLabel} (${r + 1}-${c + 1})`,
-                rotation: 180
-             });
-
-             if (canvasP2) {
-                const blobP2 = await new Promise<Blob | null>(resolve => canvasP2.toBlob(resolve));
-                if (blobP2) {
-                    zip.file(`P2_row${r+1}_col${c+1}.png`, blobP2);
-                }
-             }
-           }
-        }
-      }
-
-      const content = await zip.generateAsync({ type: "blob" });
-      saveAs(content, "perler-pattern-split.zip");
       setShowSplitModal(false);
     } catch (error) {
       console.error("Export failed", error);
@@ -654,61 +596,7 @@ const App = () => {
     }
   };
 
-  const handleDualExport = async () => {
-    if (!patternData) return;
-    setIsExporting(true);
 
-    try {
-      const zip = new JSZip();
-
-      // 1. Normal View (Player 1)
-      const canvas1 = drawPatternToCanvas(patternData, {
-        startX: 0,
-        startY: 0,
-        width: patternData.width,
-        height: patternData.height,
-        beadShape,
-        hiddenBeadIds,
-        title: `${siteLabel} - P1 (Normal)`
-      });
-
-      if (canvas1) {
-        const blob1 = await new Promise<Blob | null>(resolve => canvas1.toBlob(resolve));
-        if (blob1) zip.file(`pattern_p1_normal.png`, blob1);
-      }
-
-      // 2. Rotated View (Player 2)
-      // Pattern is Unchanged (Original Grid)
-      // Text is Rotated 180 (So P2 can read it when sitting opposite)
-      // When P2 reads the text correctly, the paper is effectively upside down relative to P1.
-      // And the Pattern appears rotated 180 to P1 (which is correct for P2's view).
-      
-      const canvas2 = drawPatternToCanvas(patternData, {
-        startX: 0,
-        startY: 0,
-        width: patternData.width,
-        height: patternData.height,
-        beadShape,
-        hiddenBeadIds,
-        title: `${siteLabel} - P2 (Face-to-Face 180°)`,
-        rotation: 180
-      });
-
-      if (canvas2) {
-        const blob2 = await new Promise<Blob | null>(resolve => canvas2.toBlob(resolve));
-        if (blob2) zip.file(`pattern_p2_rotated_text.png`, blob2);
-      }
-
-      const content = await zip.generateAsync({ type: "blob" });
-      saveAs(content, "perler-pattern-dual-coop.zip");
-
-    } catch (error) {
-      console.error("Dual export failed", error);
-      alert("Export failed");
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center gap-6 bg-[#e0e5ec]">

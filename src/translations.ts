@@ -1,5 +1,7 @@
 export type Language = "zh" | "en";
 
+export type TranslationMap = typeof translations.en;
+
 export const translations = {
   en: {
     appTitle: "PerlerGen",
