@@ -43,15 +43,14 @@ export const drawPatternToCanvas = (
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-  // If rotation is 180, we rotate the entire context around the center
-  // REMOVED: This rotates the pattern too. We only want to rotate TEXT.
-  /*
+  // If rotation is 180, we rotate the entire context around the center.
+  // This inverts the pattern (which matches P2's view from opposite side).
+  // The text will be counter-rotated by drawText to remain upright for readability.
   if (rotation === 180) {
-     ctx.translate(canvasWidth / 2, canvasHeight / 2);
-     ctx.rotate(Math.PI);
-     ctx.translate(-canvasWidth / 2, -canvasHeight / 2);
+    ctx.translate(canvasWidth / 2, canvasHeight / 2);
+    ctx.rotate(Math.PI);
+    ctx.translate(-canvasWidth / 2, -canvasHeight / 2);
   }
-  */
 
   // Title offset calculation
   let titleOffset = 0;
