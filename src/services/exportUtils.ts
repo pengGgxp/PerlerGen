@@ -1,5 +1,25 @@
 import { PatternData } from "../types";
 
+// Helper to draw watermark
+const drawWatermark = (
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number
+) => {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // Ensure watermark is always upright and in correct position
+  ctx.font = "bold 20px sans-serif";
+  ctx.fillStyle = "rgba(148, 163, 184, 0.5)"; // Slate-400 with 0.5 opacity
+  ctx.textAlign = "right";
+  ctx.textBaseline = "bottom";
+  const text =
+    typeof window !== "undefined" && window.location.hostname
+      ? window.location.hostname
+      : "PerlerGen";
+  ctx.fillText(text, width - 15, height - 15);
+  ctx.restore();
+};
+
 interface DrawOptions {
   startX: number;
   startY: number;
@@ -239,6 +259,9 @@ export const drawPatternToCanvas = (
   ctx.lineWidth = 2;
   ctx.strokeRect(0, 0, width * cellSize, height * cellSize);
 
+  // Draw Watermark
+  drawWatermark(ctx, canvasWidth, canvasHeight);
+
   return canvas;
 };
 
@@ -360,6 +383,9 @@ export const drawMaterialListToCanvas = (
     canvasWidth - padding * 2,
     items.length * rowHeight
   );
+
+  // Draw Watermark
+  drawWatermark(ctx, canvasWidth, canvasHeight);
 
   return canvas;
 };

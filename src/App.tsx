@@ -17,6 +17,7 @@ import { FreeDrawEditor } from './components/FreeDrawEditor';
 const App = () => {
   const [language, setLanguage] = useState<Language>('zh'); // Default to Chinese
   const t = translations[language];
+  const siteLabel = (typeof window !== 'undefined' && window.location.hostname) ? window.location.hostname : t.appTitle;
   
   // Context
   const { allPalettes, selectedPaletteId, activePalette, setSelectedPaletteId, addCustomPalette, removeCustomPalette } = usePalette();
@@ -231,7 +232,7 @@ const App = () => {
         activePalette.colors,
         hiddenBeadIds,
         excludeHiddenMaterials,
-        `${t.appTitle} - ${t.materials}`
+        `${siteLabel} - ${t.materials}`
     );
 
     if (canvas) {
@@ -570,7 +571,7 @@ const App = () => {
       height: patternData.height,
       beadShape,
       hiddenBeadIds,
-      title: `${t.appTitle} - ${patternData.width}x${patternData.height}`
+      title: `${siteLabel} - ${patternData.width}x${patternData.height}`
     });
 
     if (!canvas) return;
@@ -608,8 +609,8 @@ const App = () => {
              beadShape,
              hiddenBeadIds,
              title: isDualExport 
-                ? `P1 - ${t.appTitle} (${r + 1}-${c + 1})`
-                : `${t.appTitle} - ${r + 1}-${c + 1}`
+                ? `P1 - ${siteLabel} (${r + 1}-${c + 1})`
+                : `${siteLabel} - ${r + 1}-${c + 1}`
            });
 
            if (canvas) {
@@ -628,7 +629,7 @@ const App = () => {
                 height: currentHeight,
                 beadShape,
                 hiddenBeadIds,
-                title: `P2 - ${t.appTitle} (${r + 1}-${c + 1})`,
+                title: `P2 - ${siteLabel} (${r + 1}-${c + 1})`,
                 rotation: 180
              });
 
@@ -668,7 +669,7 @@ const App = () => {
         height: patternData.height,
         beadShape,
         hiddenBeadIds,
-        title: `${t.appTitle} - P1 (Normal)`
+        title: `${siteLabel} - P1 (Normal)`
       });
 
       if (canvas1) {
@@ -689,7 +690,7 @@ const App = () => {
         height: patternData.height,
         beadShape,
         hiddenBeadIds,
-        title: `${t.appTitle} - P2 (Face-to-Face 180°)`,
+        title: `${siteLabel} - P2 (Face-to-Face 180°)`,
         rotation: 180
       });
 
