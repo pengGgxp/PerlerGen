@@ -55,6 +55,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
   const [showEraserPicker, setShowEraserPicker] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [showBeadNames, setShowBeadNames] = useState(true);
+  const [showStats, setShowStats] = useState(false);
   const [popoverCoords, setPopoverCoords] = useState({ x: 0, bottom: 0 });
 
   const toggleColorPicker = (e: React.MouseEvent) => {
@@ -412,6 +413,25 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
      setShowClearConfirm(false);
   };
 
+  // Material Stats
+  const materialStats = React.useMemo(() => {
+    const counts = new Map<string, { bead: BeadColor; count: number }>();
+    grid.forEach(row => {
+      row.forEach(bead => {
+        // Skip background/eraser color if desired, but usually we count everything or filter later
+        // Assuming eraserColor is 'white' or background, maybe we should skip it?
+        // Let's skip if it matches eraserColor ID
+        if (bead.id === eraserColor.id) return;
+
+        if (!counts.has(bead.id)) {
+          counts.set(bead.id, { bead, count: 0 });
+        }
+        counts.get(bead.id)!.count++;
+      });
+    });
+    return Array.from(counts.values()).sort((a, b) => b.count - a.count);
+  }, [grid, eraserColor.id]);
+
   return (
     <div className="fixed inset-0 z-50 bg-[#e0e5ec] flex flex-col overscroll-none" style={{ height: '100dvh' }}>
       {/* Header */}
@@ -424,6 +444,38 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
           <NeuButton onClick={() => onSave(grid)} className="text-green-600 px-3 py-1 text-sm md:text-base md:px-6 md:py-2">{t.save}</NeuButton>
         </div>
       </div>
+
+      {/* Material Stats Panel - Floating Right */}
+      {showStats && (
+        <div className="absolute top-2 md:top-4 right-2 md:right-4 z-40 w-48 md:w-64 bg-[#e0e5ec]/90 backdrop-blur-sm p-4 rounded-xl shadow-xl max-h-[60vh] overflow-y-auto animate-in fade-in slide-in-from-right-4 duration-200">
+             <div className="flex justify-between items-center mb-2">
+                <h3 className="font-bold text-slate-700">{t.materials}</h3>
+                <button onClick={() => setShowStats(false)} className="text-slate-500 hover:text-slate-700">
+                    <Icon icon="lucide:x" className="w-4 h-4" />
+                </button>
+             </div>
+             <div className="flex flex-col gap-2">
+                {materialStats.length === 0 ? (
+                    <p className="text-sm text-slate-500 text-center py-4">No beads used</p>
+                ) : (
+                    materialStats.map(({ bead, count }) => (
+                        <div key={bead.id} className="flex items-center justify-between text-sm bg-white/50 p-1.5 rounded-lg">
+                            <div className="flex items-center gap-2 overflow-hidden">
+                                <div 
+                                    className="w-6 h-6 rounded-full border border-slate-200 shrink-0" 
+                                    style={{ backgroundColor: bead.hex }}
+                                />
+                                <span className="truncate text-slate-700 font-medium" title={bead.name}>
+                                    {bead.id}
+                                </span>
+                            </div>
+                            <span className="font-bold text-slate-600 shrink-0 ml-2">{count}</span>
+                        </div>
+                    ))
+                )}
+             </div>
+        </div>
+      )}
 
       {/* Toolbar & Canvas Container */}
       <div className="flex-1 overflow-hidden relative">
@@ -527,6 +579,14 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
                         title={t.showBeadNames}
                     >
                         <Icon icon="lucide:hash" className="w-6 h-6" />
+                    </NeuButton>
+                    <NeuButton 
+                        active={showStats}
+                        onClick={() => setShowStats(!showStats)} 
+                        className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" 
+                        title={t.materials}
+                    >
+                        <Icon icon="lucide:list" className="w-6 h-6" />
                     </NeuButton>
                     <NeuButton onClick={handleFlipH} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolFlipH}>
                         <Icon icon="lucide:flip-horizontal" className="w-6 h-6" />
