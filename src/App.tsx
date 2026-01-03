@@ -973,37 +973,37 @@ const App = () => {
 
           {/* Action Footer */}
           {patternData && (
-             <div className="flex justify-end gap-4">
+             <div className="grid grid-cols-2 gap-3 md:flex md:justify-end md:gap-4">
                <NeuButton 
                   onClick={() => setShowMaterialExportModal(true)}
-                  className="flex items-center gap-2 shadow-lg bg-slate-100 text-slate-600 hover:text-slate-800"
+                  className="flex items-center justify-center gap-2 shadow-lg bg-slate-100 text-slate-600 hover:text-slate-800 text-xs md:text-base px-2 md:px-6 py-3 md:py-2 w-full md:w-auto"
                >
-                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                 {t.exportMaterials}
+                 <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                 <span className="truncate">{t.exportMaterials}</span>
                </NeuButton>
 
                <NeuButton 
                   onClick={() => setShowSplitModal(true)}
-                  className="flex items-center gap-2 shadow-lg bg-slate-100 text-slate-600 hover:text-slate-800"
+                  className="flex items-center justify-center gap-2 shadow-lg bg-slate-100 text-slate-600 hover:text-slate-800 text-xs md:text-base px-2 md:px-6 py-3 md:py-2 w-full md:w-auto"
                >
-                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                 {t.downloadSplit}
+                 <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                 <span className="truncate">{t.downloadSplit}</span>
                </NeuButton>
 
                <NeuButton 
                   onClick={() => setIsFreeDrawMode(true)}
-                  className="flex items-center gap-2 shadow-lg bg-blue-100 text-blue-700 hover:text-blue-900"
+                  className="flex items-center justify-center gap-2 shadow-lg bg-blue-100 text-blue-700 hover:text-blue-900 text-xs md:text-base px-2 md:px-6 py-3 md:py-2 w-full md:w-auto"
                >
-                 <span className="text-lg">🎨</span>
-                 {t.freeDrawBtn}
+                 <span className="text-base md:text-lg flex-shrink-0">🎨</span>
+                 <span className="truncate">{t.freeDrawBtn}</span>
                </NeuButton>
 
                <NeuButton 
                   onClick={handleDownload}
-                  className="flex items-center gap-2 shadow-lg"
+                  className="flex items-center justify-center gap-2 shadow-lg text-xs md:text-base px-2 md:px-6 py-3 md:py-2 w-full md:w-auto"
                >
-                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                 {t.download}
+                 <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                 <span className="truncate">{t.download}</span>
                </NeuButton>
              </div>
           )}

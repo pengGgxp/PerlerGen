@@ -106,6 +106,7 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
                 onChange={(_, percentCrop) => setCrop(percentCrop)}
                 onComplete={(c) => setCompletedCrop(c)}
                 className="m-auto"
+                style={{ maxWidth: '100%', maxHeight: '100%' }}
             >
                 <img 
                     ref={imgRef}

@@ -29,7 +29,7 @@ export const NeuButton: React.FC<Props & { disabled?: boolean }> = ({ children, 
       ${BASE_BG} 
       ${active ? SHADOW_IN : SHADOW_OUT} 
       ${disabled ? 'opacity-50 cursor-not-allowed' : 'active:shadow-[inset_4px_4px_8px_0_rgba(163,177,198,0.7),inset_-4px_-4px_8px_0_rgba(255,255,255,0.8)] transform active:scale-[0.98]'}
-      rounded-full px-6 py-2 font-bold ${TEXT_COLOR} transition-all duration-200
+      rounded-full px-3 py-1.5 md:px-6 md:py-2 font-bold ${TEXT_COLOR} transition-all duration-200
       ${className}
     `}
   >
