@@ -4,8 +4,8 @@ import { HAMA_COLORS } from "./beads/hama";
 import { ARTKAL_S_COLORS } from "./beads/artkal";
 import { GENERIC_291_COLORS } from "./beads/generic291";
 import { PERLER_221_COLORS } from "./beads/perler221";
-import { MARD_221_COLORS } from "./beads/mard";
-import { MARD_265_COLORS } from "./beads/mard265";
+import { MARD_221_COLORS } from "./beads/mard221";
+import { MARD_291_COLORS } from "./beads/mard291";
 
 // Re-export colors and utils
 export { PERLER_COLORS } from "./beads/perler";
@@ -13,15 +13,15 @@ export { HAMA_COLORS } from "./beads/hama";
 export { ARTKAL_S_COLORS } from "./beads/artkal";
 export { GENERIC_291_COLORS } from "./beads/generic291";
 export { PERLER_221_COLORS } from "./beads/perler221";
-export { MARD_221_COLORS } from "./beads/mard";
-export { MARD_265_COLORS } from "./beads/mard265";
+export { MARD_221_COLORS } from "./beads/mard221";
+export { MARD_291_COLORS } from "./beads/mard291";
 export { hexToRgb, getColorDistance } from "./beads/utils";
 
 export const AVAILABLE_PALETTES: Palette[] = [
   {
     id: "mard_265",
     name: "Mard Beads (265 Colors) / M豆265色",
-    colors: MARD_265_COLORS,
+    colors: MARD_291_COLORS,
   },
   {
     id: "mard_221",

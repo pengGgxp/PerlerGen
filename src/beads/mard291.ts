@@ -1,6 +1,6 @@
 import { BeadColor } from "../types";
 
-export const MARD_265_COLORS: BeadColor[] = [
+export const MARD_291_COLORS: BeadColor[] = [
   { id: "A01", name: "A01", hex: "#FAF4C8" },
   { id: "A02", name: "A02", hex: "#FFFFD5" },
   { id: "A03", name: "A03", hex: "#FEFF8B" },
