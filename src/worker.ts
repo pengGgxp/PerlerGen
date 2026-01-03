@@ -29,7 +29,11 @@ export default {
       return handleLog(request, env);
     }
     // 记录简单请求
-    return await handleLog(request, env);
+    handleLog(request, env);
+    // 继续处理请求
+    // 注意：这里返回的 Response 类型是 Workers 运行时的 Response，不是 @cloudflare/workers-types 中的 Response
+    //@ts-ignore
+    return await env.ASSETS.fetch(request);
   },
 };
 
