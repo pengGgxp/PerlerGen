@@ -111,6 +111,7 @@ const App = () => {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      Logger.log('upload_image', { fileName: file.name, fileSize: file.size });
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
@@ -125,6 +126,9 @@ const App = () => {
         setPan({ x: 0, y: 0 });
         setImageSrc(null); // Clear current processed image until crop is done
       };
+      reader.onerror = (e) => {
+        Logger.log('upload_image_error', { error: String(e.target?.error) });
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -132,6 +136,7 @@ const App = () => {
   const handleCsvUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+        Logger.log('upload_csv', { fileName: file.name, fileSize: file.size });
         setCsvFile(file);
         // Default name to filename without extension
         if (!csvName) {
@@ -151,10 +156,15 @@ const App = () => {
               setShowCsvModal(false);
               setCsvFile(null);
               setCsvName('');
+              Logger.log('import_csv_success', { paletteName: csvName, colorCount: colors.length });
               alert(`Imported ${colors.length} colors successfully!`);
           } else {
+              Logger.log('import_csv_failed', { paletteName: csvName, reason: 'Parse failed' });
               alert('Failed to parse CSV. Please check the format.');
           }
+      };
+      reader.onerror = (e) => {
+          Logger.log('import_csv_error', { error: String(e.target?.error) });
       };
       reader.readAsText(csvFile);
   };
@@ -567,6 +577,7 @@ const App = () => {
   const handleDownload = async () => {
     if (!patternData) return;
     setIsExporting(true);
+    Logger.log('export_pattern_start', { type: 'single', isDualExport });
     
     try {
         await ExportController.handleDownload({
@@ -578,8 +589,10 @@ const App = () => {
             hiddenBeadIds,
             isDualExport
         });
+        Logger.log('export_pattern_success');
     } catch (error) {
         console.error("Export failed", error);
+        Logger.log('export_pattern_error', { error: String(error) });
         alert("Export failed");
     } finally {
         setIsExporting(false);
@@ -589,6 +602,7 @@ const App = () => {
   const handleSplitDownload = async () => {
     if (!patternData) return;
     setIsExporting(true);
+    Logger.log('export_pattern_start', { type: 'split', isDualExport, splitConfig });
 
     try {
       await ExportController.exportSplitPattern({
@@ -603,8 +617,10 @@ const App = () => {
       });
       
       setShowSplitModal(false);
+      Logger.log('export_pattern_success', { type: 'split' });
     } catch (error) {
       console.error("Export failed", error);
+      Logger.log('export_pattern_error', { type: 'split', error: String(error) });
       alert("Export failed");
     } finally {
       setIsExporting(false);
@@ -1306,5 +1322,7 @@ const App = () => {
     </div>
   );
 };
+
+
 
 export default App;
