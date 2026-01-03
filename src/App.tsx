@@ -38,7 +38,7 @@ const App = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [beadShape, setBeadShape] = useState<'round' | 'square'>('round');
+  const [beadShape, setBeadShape] = useState<'round' | 'square'>('square');
   const [denoiseLevel, setDenoiseLevel] = useState<number>(0);
   const [appliedDenoiseLevel, setAppliedDenoiseLevel] = useState<number>(0);
 
