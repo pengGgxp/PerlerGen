@@ -29,7 +29,9 @@ export default {
       return handleLog(request, env);
     }
     // 记录简单请求
-    handleLog(request, env);
+    // 使用 ctx.waitUntil 确保在返回响应后后台任务（如数据库写入）能继续执行
+    // 这是 Cloudflare Workers 的要求，否则任务可能会被取消
+    ctx.waitUntil(handleLog(request.clone(), env));
     // 继续处理请求
     // 注意：这里返回的 Response 类型是 Workers 运行时的 Response，不是 @cloudflare/workers-types 中的 Response
     //@ts-ignore
@@ -44,13 +46,14 @@ async function handleLog(request: Request, env: Env): Promise<Response> {
     // @ts-ignore - cf property exists on Request in Workers
     const country = request.cf?.country || "unknown";
     const timestamp = new Date().toISOString();
+    const url = new URL(request.url);
 
-    let action = "unknown";
+    let action = `path: ${url.pathname}`;
     let details = "";
 
     try {
       const body = (await request.json()) as LogData;
-      if (body.action) action = body.action;
+      if (body.action) action = `${action} | ${body.action}`;
       if (body.details) {
         details =
           typeof body.details === "string"
