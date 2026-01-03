@@ -28,10 +28,11 @@ export default {
     if (url.pathname === "/api/log" && request.method === "POST") {
       return handleLog(request, env);
     }
-    // 记录简单请求
-    // 使用 ctx.waitUntil 确保在返回响应后后台任务（如数据库写入）能继续执行
-    // 这是 Cloudflare Workers 的要求，否则任务可能会被取消
-    ctx.waitUntil(handleLog(request.clone(), env));
+    // 添加统计接口
+    if (url.pathname === "/api/stats" && request.method === "GET") {
+      return handleStats(env);
+    }
+
     // 继续处理请求
     // 注意：这里返回的 Response 类型是 Workers 运行时的 Response，不是 @cloudflare/workers-types 中的 Response
     //@ts-ignore
@@ -78,6 +79,47 @@ async function handleLog(request: Request, env: Env): Promise<Response> {
     });
   } catch (error) {
     console.error("Failed to log request:", error);
+    return new Response(
+      JSON.stringify({ success: false, error: String(error) }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+}
+
+async function handleStats(env: Env): Promise<Response> {
+  try {
+    // 获取今日日期 (UTC)
+    const today = new Date().toISOString().split("T")[0];
+
+    // 查询总访问次数 (action = 'page_view')
+    const totalQuery = await env.DB.prepare(
+      "SELECT COUNT(*) as count FROM activity_logs WHERE TRIM(action) = 'page_view'"
+    ).first();
+
+    // 查询今日访问次数
+    const todayQuery = await env.DB.prepare(
+      "SELECT COUNT(*) as count FROM activity_logs WHERE TRIM(action) = 'page_view' AND date(timestamp) = ?"
+    )
+      .bind(today)
+      .first();
+
+    return new Response(
+      JSON.stringify({
+        total: totalQuery?.count || 0,
+        today: todayQuery?.count || 0,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          // 允许跨域
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
+    );
+  } catch (error) {
     return new Response(
       JSON.stringify({ success: false, error: String(error) }),
       {

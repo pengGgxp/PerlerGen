@@ -3,10 +3,7 @@
  * 用于将操作记录发送到后端 Worker 进行存储
  */
 
-interface LogPayload {
-  action: string;
-  details?: any;
-}
+import { ApiService } from "./api";
 
 export const Logger = {
   /**
@@ -15,19 +12,7 @@ export const Logger = {
    * @param details 详细信息 (可选, 支持对象)
    */
   log: async (action: string, details?: any) => {
-    try {
-      // 在开发环境下，可能需要配置 Vite 代理，或者直接忽略错误
-      // 生产环境下，请求会发送给同域名的 Worker
-      await fetch("/api/log", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ action, details }),
-      });
-    } catch (error) {
-      // 记录日志失败不应影响用户主要操作，仅在控制台输出警告
-      console.warn("Failed to send log:", error);
-    }
+    // 委托给 ApiService 处理
+    await ApiService.log(action, details);
   },
 };
