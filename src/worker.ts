@@ -46,14 +46,16 @@ async function handleLog(request: Request, env: Env): Promise<Response> {
     // @ts-ignore - cf property exists on Request in Workers
     const country = request.cf?.country || "unknown";
     const timestamp = new Date().toISOString();
-    const url = new URL(request.url);
+    // const url = new URL(request.url);
 
-    let action = `path: ${url.pathname}`;
+    // let action = `path: ${url.pathname}`;
+    let action = "";
     let details = "";
 
     try {
       const body = (await request.json()) as LogData;
-      if (body.action) action = `${action} | ${body.action}`;
+      // if (body.action) action = `${action} | ${body.action}`;
+      if (body.action) action = `${body.action}`;
       if (body.details) {
         details =
           typeof body.details === "string"
