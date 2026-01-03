@@ -22,10 +22,10 @@ export const NeuCard: React.FC<Props> = ({ children, className = '' }) => (
   </div>
 );
 
-export const NeuButton: React.FC<Props & { disabled?: boolean }> = ({ children, className = '', onClick, active, disabled }) => (
+export const NeuButton: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { active?: boolean }> = ({ children, className = '', active, disabled, ...props }) => (
   <button
-    onClick={onClick}
     disabled={disabled}
+    {...props}
     className={`
       ${BASE_BG} 
       ${active ? SHADOW_IN : SHADOW_OUT} 

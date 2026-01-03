@@ -21,10 +21,12 @@
     "react-image-crop": "^11.0.10"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260103.0",
     "@types/file-saver": "^2.0.7",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "vite": "^6.2.0",
+    "wrangler": "^4.54.0"
   }
 }
