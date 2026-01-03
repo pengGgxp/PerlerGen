@@ -11,6 +11,7 @@ import { usePalette } from './context/PaletteContext';
 import { parsePaletteCSV } from './services/csvUtils';
 import { ImageCropper } from './components/ImageCropper';
 import { FreeDrawEditor } from './components/FreeDrawEditor';
+import { Icon } from '@iconify/react';
 
 const App = () => {
   const [language, setLanguage] = useState<Language>('zh'); // Default to Chinese
@@ -678,7 +679,7 @@ const App = () => {
                          className="p-2 text-red-400 hover:text-red-600 transition-colors"
                          title={t.deletePalette}
                        >
-                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                         <Icon icon="lucide:trash-2" className="w-5 h-5" />
                        </button>
                      )}
                    </div>
@@ -693,9 +694,9 @@ const App = () => {
                             title={lockRatio ? t.ratioLocked : t.ratioUnlocked}
                         >
                             {lockRatio ? (
-                                <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg> {t.ratioLocked}</>
+                                <><Icon icon="lucide:lock" className="w-3 h-3" /> {t.ratioLocked}</>
                             ) : (
-                                <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" /></svg> {t.ratioUnlocked}</>
+                                <><Icon icon="lucide:unlock" className="w-3 h-3" /> {t.ratioUnlocked}</>
                             )}
                         </button>
                     </div>
@@ -749,13 +750,13 @@ const App = () => {
                    <div className="flex items-center justify-between" title={t.mirrorFlipTooltip}>
                       <div className="flex items-center gap-1 cursor-help">
                          <label className="text-sm font-bold text-slate-500">{t.mirrorFlip}</label>
-                         <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                         <Icon icon="lucide:info" className="w-4 h-4 text-slate-400" />
                       </div>
                       <NeuButton 
                          onClick={handleMirrorFlip}
                          className="!py-1.5 !px-3 text-xs flex items-center gap-1"
                       >
-                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" /></svg>
+                         <Icon icon="lucide:flip-horizontal" className="w-4 h-4" />
                       </NeuButton>
                    </div>
 
@@ -763,7 +764,7 @@ const App = () => {
                    <div className="flex items-center justify-between" title={t.dualExportTooltip}>
                       <div className="flex items-center gap-1 cursor-help">
                          <label htmlFor="dualExportConfig" className="text-sm font-bold text-slate-500 cursor-pointer">{t.dualExport}</label>
-                         <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                         <Icon icon="lucide:info" className="w-4 h-4 text-slate-400" />
                       </div>
                       <input 
                         type="checkbox" 
@@ -801,7 +802,7 @@ const App = () => {
                       <span className="animate-pulse">{t.analyzing}</span>
                     ) : (
                       <>
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        <Icon icon="lucide:zap" className="w-4 h-4" />
                         {t.analyzeBtn}
                       </>
                     )}
@@ -870,16 +871,16 @@ const App = () => {
                              title={isHidden ? t.showBeads : t.hideBeads}
                           >
                              {isHidden ? (
-                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                               <Icon icon="lucide:eye-off" className="w-4 h-4" />
                              ) : (
-                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                               <Icon icon="lucide:eye" className="w-4 h-4" />
                              )}
                           </button>
                           
                           <div className="w-6 h-6 rounded-full border border-slate-300 shadow-sm relative group-hover:scale-110 transition-transform" style={{ backgroundColor: bead.hex }}>
                              {/* Edit Icon Overlay */}
                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 bg-black/20 rounded-full transition-opacity">
-                                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                <Icon icon="lucide:pencil" className="w-3 h-3 text-white" />
                              </div>
                           </div>
                           <div className="flex flex-col">
@@ -903,7 +904,7 @@ const App = () => {
           <NeuCard className="flex-1 min-h-[500px] flex items-center justify-center relative overflow-hidden p-0 bg-slate-200/50" >
             {!imageSrc ? (
                <div className="flex flex-col items-center gap-4 text-slate-400 p-8">
-                 <svg className="w-24 h-24 opacity-20" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" /></svg>
+                 <Icon icon="lucide:image" className="w-24 h-24 opacity-20" />
                  <p className="font-bold text-lg opacity-50">{t.noImage}</p>
                </div>
             ) : (
@@ -964,7 +965,7 @@ const App = () => {
                         className="absolute bottom-4 left-4 p-2 bg-white/80 rounded-full shadow-lg text-slate-600 hover:text-blue-500 z-20"
                         title={t.resetView}
                      >
-                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+                         <Icon icon="lucide:maximize" className="w-5 h-5" />
                      </button>
                  )}
               </div>
@@ -978,7 +979,7 @@ const App = () => {
                   onClick={() => setShowMaterialExportModal(true)}
                   className="flex items-center justify-center gap-2 shadow-lg bg-slate-100 text-slate-600 hover:text-slate-800 text-xs md:text-base px-2 md:px-6 py-3 md:py-2 w-full md:w-auto"
                >
-                 <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                 <Icon icon="lucide:clipboard-list" className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
                  <span className="truncate">{t.exportMaterials}</span>
                </NeuButton>
 
@@ -986,7 +987,7 @@ const App = () => {
                   onClick={() => setShowSplitModal(true)}
                   className="flex items-center justify-center gap-2 shadow-lg bg-slate-100 text-slate-600 hover:text-slate-800 text-xs md:text-base px-2 md:px-6 py-3 md:py-2 w-full md:w-auto"
                >
-                 <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                 <Icon icon="lucide:grid" className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
                  <span className="truncate">{t.downloadSplit}</span>
                </NeuButton>
 
@@ -994,7 +995,7 @@ const App = () => {
                   onClick={() => setIsFreeDrawMode(true)}
                   className="flex items-center justify-center gap-2 shadow-lg bg-blue-100 text-blue-700 hover:text-blue-900 text-xs md:text-base px-2 md:px-6 py-3 md:py-2 w-full md:w-auto"
                >
-                 <span className="text-base md:text-lg flex-shrink-0">🎨</span>
+                 <Icon icon="lucide:palette" className="w-5 h-5 flex-shrink-0" />
                  <span className="truncate">{t.freeDrawBtn}</span>
                </NeuButton>
 
@@ -1002,7 +1003,7 @@ const App = () => {
                   onClick={handleDownload}
                   className="flex items-center justify-center gap-2 shadow-lg text-xs md:text-base px-2 md:px-6 py-3 md:py-2 w-full md:w-auto"
                >
-                 <svg className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                 <Icon icon="lucide:download" className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
                  <span className="truncate">{t.download}</span>
                </NeuButton>
              </div>
@@ -1124,7 +1125,7 @@ const App = () => {
                    <span className="animate-pulse">{t.processing}...</span>
                 ) : (
                    <>
-                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                     <Icon icon="lucide:file-archive" className="w-5 h-5" />
                      {t.exportZip}
                    </>
                 )}
@@ -1219,8 +1220,8 @@ const App = () => {
           <div className="w-64 h-64 bg-white p-2 rounded-xl shadow-inner flex items-center justify-center">
              <img src="/alipay.jpg" alt="Alipay QR Code" className="w-full h-full object-contain" />
           </div>
-          <p className="text-slate-500 text-center text-sm font-medium">
-            {t.footerBuyMeCoffee} ❤️
+          <p className="text-slate-500 text-center text-sm font-medium flex items-center justify-center gap-2">
+            {t.footerBuyMeCoffee} <Icon icon="lucide:heart" className="w-4 h-4 text-red-500 fill-current" />
           </p>
         </div>
       </NeuModal>
@@ -1229,17 +1230,17 @@ const App = () => {
       <footer className="w-full max-w-7xl flex flex-col md:flex-row justify-between items-center gap-4 mt-12 pb-8 text-slate-500 border-t border-slate-300/50 pt-8">
         <div className="flex items-center gap-4 text-sm font-medium">
           <a href="https://blog.str1ct.top/" target="_blank" rel="noopener noreferrer" className="hover:text-slate-700 flex items-center gap-2 transition-colors">
-             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" /></svg>
+             <Icon icon="lucide:book-open" className="w-5 h-5" />
              <span>{t.footerBlog}</span>
           </a>
           <span className="text-slate-300">•</span>
           <a href="https://github.com/pengGgxp/PerlerGen" target="_blank" rel="noopener noreferrer" className="hover:text-slate-700 flex items-center gap-2 transition-colors">
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clipRule="evenodd" /></svg>
+            <Icon icon="lucide:github" className="w-5 h-5" />
             <span>{t.footerOpenSource}</span>
           </a>
           <span className="text-slate-300">•</span>
           <a href="https://github.com/pengGgxp/PerlerGen" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-500 flex items-center gap-1 transition-colors">
-             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+             <Icon icon="lucide:star" className="w-4 h-4" />
              {t.footerStar}
           </a>
         </div>
@@ -1248,7 +1249,7 @@ const App = () => {
           onClick={() => setShowDonationModal(true)}
           className="!px-5 !py-2 text-sm flex items-center gap-2 font-bold text-slate-600 hover:text-pink-500"
         >
-          <span>🧋</span> {t.footerBuyMeCoffee}
+          <Icon icon="lucide:coffee" className="w-4 h-4" /> {t.footerBuyMeCoffee}
         </NeuButton>
       </footer>
 

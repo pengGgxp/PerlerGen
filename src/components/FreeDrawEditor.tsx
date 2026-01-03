@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { Icon } from '@iconify/react';
 import { NeuCard, NeuButton, NeuSelect, NeuModal } from './NeumorphicComponents';
 import { BeadColor, PatternData } from '../types';
 import { translations } from '../translations';
@@ -439,19 +440,25 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
                         onClick={() => setSelectedTool('pencil')} 
                         className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl"
                         title={t.toolPencil}
-                    >✏️</NeuButton>
+                    >
+                        <Icon icon="lucide:pencil" className="w-6 h-6" />
+                    </NeuButton>
                     <NeuButton 
                         active={selectedTool === 'bucket'} 
                         onClick={() => setSelectedTool('bucket')} 
                         className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl"
                         title={t.toolBucket}
-                    >🪣</NeuButton>
+                    >
+                        <Icon icon="lucide:paint-bucket" className="w-6 h-6" />
+                    </NeuButton>
                     <NeuButton 
                         active={selectedTool === 'picker'} 
                         onClick={() => setSelectedTool('picker')} 
                         className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl"
                         title={t.toolPicker}
-                    >🖌️</NeuButton>
+                    >
+                        <Icon icon="lucide:pipette" className="w-6 h-6" />
+                    </NeuButton>
                 </div>
 
                 <div className="w-px h-8 bg-slate-300 mx-1"></div>
@@ -475,7 +482,9 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
                         onClick={() => setSelectedTool('eraser')} 
                         className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl"
                         title={t.toolEraser}
-                    >🧹</NeuButton>
+                    >
+                        <Icon icon="lucide:eraser" className="w-6 h-6" />
+                    </NeuButton>
                     
                     {/* Eraser Color Trigger */}
                     <div 
@@ -490,10 +499,18 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
 
                 {/* Image Actions */}
                 <div className="flex gap-2 shrink-0">
-                    <NeuButton onClick={handleFlipH} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolFlipH}>↔️</NeuButton>
-                    <NeuButton onClick={handleFlipV} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolFlipV}>↕️</NeuButton>
-                    <NeuButton onClick={handleRotate} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolRotate}>🔄</NeuButton>
-                    <NeuButton onClick={handleClear} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl text-red-500" title={t.toolClear}>🗑️</NeuButton>
+                    <NeuButton onClick={handleFlipH} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolFlipH}>
+                        <Icon icon="lucide:flip-horizontal" className="w-6 h-6" />
+                    </NeuButton>
+                    <NeuButton onClick={handleFlipV} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolFlipV}>
+                        <Icon icon="lucide:flip-vertical" className="w-6 h-6" />
+                    </NeuButton>
+                    <NeuButton onClick={handleRotate} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolRotate}>
+                        <Icon icon="lucide:rotate-cw" className="w-6 h-6" />
+                    </NeuButton>
+                    <NeuButton onClick={handleClear} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl text-red-500" title={t.toolClear}>
+                        <Icon icon="lucide:trash-2" className="w-6 h-6" />
+                    </NeuButton>
                 </div>
             </div>
         </div>

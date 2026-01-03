@@ -4,6 +4,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 import { NeuButton, NeuCard } from './NeumorphicComponents';
 import { Jimp } from 'jimp';
 import { translations } from '../translations';
+import { Icon } from '@iconify/react';
 
 interface Props {
   imageSrc: string;
@@ -96,7 +97,7 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
         <div className="flex justify-between items-center border-b border-slate-300 pb-2 px-4 pt-2 md:pt-0">
             <h2 className="text-xl font-bold text-slate-700">{t.cropTitle}</h2>
             <button onClick={onCancel} className="text-slate-500 hover:text-slate-700">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                <Icon icon="lucide:x" className="w-6 h-6" />
             </button>
         </div>
         
