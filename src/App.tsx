@@ -12,6 +12,7 @@ import { parsePaletteCSV } from './services/csvUtils';
 import { ImageCropper } from './components/ImageCropper';
 import { FreeDrawEditor } from './components/FreeDrawEditor';
 import { Icon } from '@iconify/react';
+import { Logger } from './services/logger';
 
 const App = () => {
   const [language, setLanguage] = useState<Language>('zh'); // Default to Chinese
@@ -98,7 +99,12 @@ const App = () => {
   // Free Draw State
   const [isFreeDrawMode, setIsFreeDrawMode] = useState(false);
 
-  // Derived state for active palette - MOVED TO CONTEXT
+  // Initialize Logger
+  useEffect(() => {
+    Logger.log('page_view', '请求了页面');
+  }, []);
+
+  // HandlersDerived state for active palette - MOVED TO CONTEXT
   // const activePalette = AVAILABLE_PALETTES.find(p => p.id === selectedPaletteId) || AVAILABLE_PALETTES[0];
 
   // File Upload Handler
