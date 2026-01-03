@@ -127,8 +127,9 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
     const width = currentWidth * cellSize;
     const height = currentHeight * cellSize;
 
-    canvas.width = canvas.parentElement?.clientWidth || 800;
-    canvas.height = canvas.parentElement?.clientHeight || 600;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
 
     // Clear background
     ctx.fillStyle = '#f0f0f0';
@@ -189,6 +190,10 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
 
   useEffect(() => {
     requestAnimationFrame(drawCanvas);
+    
+    const handleResize = () => requestAnimationFrame(drawCanvas);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, [drawCanvas]);
 
   // Tool Logic
