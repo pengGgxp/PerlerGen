@@ -21,27 +21,28 @@ export const AVAILABLE_PALETTES: Palette[] = [
     name: "Mard Beads (221 Colors) / M豆221色",
     colors: MARD_221_COLORS,
   },
-  {
-    id: "perler",
-    name: "Perler (Standard 60+) / 拼拼豆豆",
-    colors: PERLER_COLORS,
-  },
-  {
-    id: "artkal",
-    name: "Artkal (Full S-Series) / 硬豆S系列",
-    colors: ARTKAL_S_COLORS,
-  },
-  {
-    id: "generic_291",
-    name: "Generic 291 (Series A-Z) / 通用291色 (A-Z系列)",
-    colors: GENERIC_291_COLORS,
-  },
-  {
-    id: "perler_221",
-    name: "Perler (221 Colors) / 拼豆221色",
-    colors: PERLER_221_COLORS,
-  },
-  { id: "hama", name: "Hama Beads / 哈马珠", colors: HAMA_COLORS },
+  //下面的部分是由于一开始不懂，添加的一些全网搜索到的色卡，不适用，所以注释掉
+  // {
+  //   id: "perler",
+  //   name: "Perler (Standard 60+) / 拼拼豆豆",
+  //   colors: PERLER_COLORS,
+  // },
+  // {
+  //   id: "artkal",
+  //   name: "Artkal (Full S-Series) / 硬豆S系列",
+  //   colors: ARTKAL_S_COLORS,
+  // },
+  // {
+  //   id: "generic_291",
+  //   name: "Generic 291 (Series A-Z) / 通用291色 (A-Z系列)",
+  //   colors: GENERIC_291_COLORS,
+  // },
+  // {
+  //   id: "perler_221",
+  //   name: "Perler (221 Colors) / 拼豆221色",
+  //   colors: PERLER_221_COLORS,
+  // },
+  // { id: "hama", name: "Hama Beads / 哈马珠", colors: HAMA_COLORS },
 ];
 
 // Compatibility export
