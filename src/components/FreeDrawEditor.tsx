@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react';
 import { NeuCard, NeuButton, NeuSelect, NeuModal } from './NeumorphicComponents';
 import { BeadColor, PatternData } from '../types';
 import { translations } from '../translations';
+import { hexToRgb } from '../beadPalettes';
 
 interface FreeDrawEditorProps {
   patternData: PatternData;
@@ -53,6 +54,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showEraserPicker, setShowEraserPicker] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [showBeadNames, setShowBeadNames] = useState(true);
   const [popoverCoords, setPopoverCoords] = useState({ x: 0, bottom: 0 });
 
   const toggleColorPicker = (e: React.MouseEvent) => {
@@ -140,6 +142,25 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
       row.forEach((bead, x) => {
         ctx.fillStyle = bead.hex;
         ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
+        if (showBeadNames) {
+            const rgb = hexToRgb(bead.hex);
+            const isDark = rgb ? (rgb.r * 0.299 + rgb.g * 0.587 + rgb.b * 0.114) < 128 : false;
+            ctx.fillStyle = isDark ? 'rgba(255,255,255,0.9)' : 'rgba(0,0,0,0.9)';
+            
+            // Adjust font size based on cell size, clamp between 8 and 20
+            const fontSize = Math.min(Math.max(8, cellSize * 0.4), cellSize * 0.8);
+            if (cellSize >= 12) { // Only draw if cell is big enough
+                ctx.font = `bold ${fontSize}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                // Try to use ID, fallback to name
+                const text = bead.id || bead.name;
+                // If text is too long for cell, maybe truncate? 
+                // For now just draw it.
+                ctx.fillText(text, x * cellSize + cellSize / 2, y * cellSize + cellSize / 2);
+            }
+        }
       });
     });
 
@@ -163,7 +184,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
     }
 
     ctx.restore();
-  }, [grid, zoom, pan]);
+  }, [grid, zoom, pan, showBeadNames]);
 
   useEffect(() => {
     requestAnimationFrame(drawCanvas);
@@ -499,6 +520,14 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
 
                 {/* Image Actions */}
                 <div className="flex gap-2 shrink-0">
+                    <NeuButton 
+                        active={showBeadNames}
+                        onClick={() => setShowBeadNames(!showBeadNames)} 
+                        className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" 
+                        title={t.showBeadNames}
+                    >
+                        <Icon icon="lucide:hash" className="w-6 h-6" />
+                    </NeuButton>
                     <NeuButton onClick={handleFlipH} className="w-10 h-10 md:w-12 md:h-12 !p-0 flex items-center justify-center text-lg md:text-xl" title={t.toolFlipH}>
                         <Icon icon="lucide:flip-horizontal" className="w-6 h-6" />
                     </NeuButton>

@@ -94,6 +94,10 @@ export const translations = {
     toolClear: "Clear",
     clearConfirmText: "Are you sure you want to clear the canvas?",
     eraserColor: "Eraser Color",
+    showBeadNames: "Show Color ID",
+    fdTouch: "1 Finger: Draw, 2 Fingers: Move/Zoom",
+    fdZoom: "Zoom: {zoom}%",
+    deletePaletteConfirm: "Are you sure you want to delete this palette?",
   },
   zh: {
     appTitle: "拼豆生成器",
@@ -190,6 +194,7 @@ export const translations = {
     toolClear: "清空",
     clearConfirmText: "确定要清空画布吗？",
     eraserColor: "橡皮擦颜色",
+    showBeadNames: "显示色号",
     fdZoom: "缩放: {zoom}% | Shift+点击平移",
     fdTouch: "双指操作平移/缩放",
   },
