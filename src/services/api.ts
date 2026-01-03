@@ -1,5 +1,4 @@
-
-interface StatsResponse {
+export interface StatsResponse {
   total: number;
   today: number;
 }
@@ -17,7 +16,7 @@ export const ApiService = {
           "Content-Type": "application/json",
         },
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -47,5 +46,5 @@ export const ApiService = {
     } catch (error) {
       console.warn("Failed to send log:", error);
     }
-  }
+  },
 };

@@ -102,6 +102,8 @@ export const translations = {
     fdTouch: "1 Finger: Draw, 2 Fingers: Move/Zoom",
     fdZoom: "Zoom: {zoom}%",
     deletePaletteConfirm: "Are you sure you want to delete this palette?",
+    todayVisits: "Today's Visits",
+    totalVisits: "Total Visits",
   },
   zh: {
     appTitle: "拼豆生成器",
@@ -201,5 +203,7 @@ export const translations = {
     showBeadNames: "显示色号",
     fdZoom: "缩放: {zoom}% | Shift+点击平移",
     fdTouch: "双指操作平移/缩放",
+    todayVisits: "今日访问",
+    totalVisits: "总访问",
   },
 };

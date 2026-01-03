@@ -13,6 +13,7 @@ import { ImageCropper } from './components/ImageCropper';
 import { FreeDrawEditor } from './components/FreeDrawEditor';
 import { Icon } from '@iconify/react';
 import { Logger } from './services/logger';
+import { ApiService, StatsResponse } from './services/api';
 
 const App = () => {
   const [language, setLanguage] = useState<Language>('zh'); // Default to Chinese
@@ -102,6 +103,18 @@ const App = () => {
   // Initialize Logger
   useEffect(() => {
     Logger.log('page_view', '请求了页面');
+  }, []);
+
+  // Stats State
+  const [stats, setStats] = useState<StatsResponse | null>(null);
+
+  // Fetch Stats
+  useEffect(() => {
+    ApiService.getStats().then(data => {
+      if (data) {
+        setStats(data);
+      }
+    });
   }, []);
 
   // HandlersDerived state for active palette - MOVED TO CONTEXT
@@ -1309,6 +1322,23 @@ const App = () => {
              <Icon icon="lucide:star" className="w-4 h-4" />
              {t.footerStar}
           </a>
+          
+          {stats && (
+            <>
+              <span className="text-slate-300 hidden md:inline">•</span>
+              <div className="flex items-center gap-3 text-xs md:text-sm">
+                <span title="Today's Visits" className="flex items-center gap-1">
+                  <Icon icon="lucide:users" className="w-4 h-4" />
+                  {t.todayVisits || "今日"}: {stats.today}
+                </span>
+                <span className="text-slate-300">/</span>
+                <span title="Total Visits" className="flex items-center gap-1">
+                  <Icon icon="lucide:bar-chart-2" className="w-4 h-4" />
+                  {t.totalVisits || "总计"}: {stats.total}
+                </span>
+              </div>
+            </>
+          )}
         </div>
         
         <NeuButton 
