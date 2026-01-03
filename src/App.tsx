@@ -87,6 +87,14 @@ const App = () => {
   const [showMaterialExportModal, setShowMaterialExportModal] = useState(false);
   const [excludeHiddenMaterials, setExcludeHiddenMaterials] = useState(true);
 
+  // Info Modal State
+  const [infoModal, setInfoModal] = useState<{ isOpen: boolean, title: string, content: string }>({
+    isOpen: false,
+    title: '',
+    content: ''
+  });
+  const closeInfoModal = () => setInfoModal(prev => ({ ...prev, isOpen: false }));
+
   // Free Draw State
   const [isFreeDrawMode, setIsFreeDrawMode] = useState(false);
 
@@ -748,8 +756,15 @@ const App = () => {
                 <div className="flex flex-col gap-3 px-1 py-2 border-t border-slate-300/50 border-b border-slate-300/50">
                    {/* Mirror Flip */}
                    <div className="flex items-center justify-between" title={t.mirrorFlipTooltip}>
-                      <div className="flex items-center gap-1 cursor-help">
-                         <label className="text-sm font-bold text-slate-500">{t.mirrorFlip}</label>
+                      <div 
+                        className="flex items-center gap-1 cursor-help"
+                        onClick={() => setInfoModal({
+                            isOpen: true,
+                            title: t.mirrorFlip,
+                            content: t.mirrorFlipTooltip
+                        })}
+                      >
+                         <label className="text-sm font-bold text-slate-600 shrink-0">{t.mirrorFlip}</label>
                          <Icon icon="lucide:info" className="w-4 h-4 text-slate-400" />
                       </div>
                       <NeuButton 
@@ -763,8 +778,19 @@ const App = () => {
                    {/* Dual Export */}
                    <div className="flex items-center justify-between" title={t.dualExportTooltip}>
                       <div className="flex items-center gap-1 cursor-help">
-                         <label htmlFor="dualExportConfig" className="text-sm font-bold text-slate-500 cursor-pointer">{t.dualExport}</label>
-                         <Icon icon="lucide:info" className="w-4 h-4 text-slate-400" />
+                         <label htmlFor="dualExportConfig" className="text-sm font-bold text-slate-600 shrink-0 cursor-pointer">{t.dualExport}</label>
+                         <Icon 
+                            icon="lucide:info" 
+                            className="w-4 h-4 text-slate-400" 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setInfoModal({
+                                    isOpen: true,
+                                    title: t.dualExport,
+                                    content: t.dualExportTooltip
+                                });
+                            }}
+                         />
                       </div>
                       <input 
                         type="checkbox" 
@@ -1130,6 +1156,24 @@ const App = () => {
                    </>
                 )}
              </NeuButton>
+          </div>
+        </div>
+      </NeuModal>
+
+      {/* Info Modal */}
+      <NeuModal
+        isOpen={infoModal.isOpen}
+        onClose={closeInfoModal}
+        title={infoModal.title}
+      >
+        <div className="flex flex-col gap-4">
+          <p className="text-slate-600 leading-relaxed text-sm md:text-base">
+            {infoModal.content}
+          </p>
+          <div className="flex justify-end pt-2">
+            <NeuButton onClick={closeInfoModal} className="w-full md:w-auto">
+              OK
+            </NeuButton>
           </div>
         </div>
       </NeuModal>
