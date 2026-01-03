@@ -50,6 +50,8 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
   // Touch State
   const lastTouchDistance = useRef<number | null>(null);
   const lastTouchCenter = useRef<{ x: number, y: number } | null>(null);
+  const touchStartRef = useRef<{ x: number, y: number } | null>(null);
+  const touchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showEraserPicker, setShowEraserPicker] = useState(false);
@@ -303,13 +305,51 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
   };
 
   // Touch Handlers
+  const handleTap = (clientX: number, clientY: number) => {
+      const pos = getGridPos(clientX, clientY);
+      if (!pos) return;
+
+      if (selectedTool === 'picker') {
+           const bead = grid[pos.y][pos.x];
+           setSelectedColor(bead);
+           setSelectedTool('pencil');
+           return;
+      }
+
+      if (selectedTool === 'bucket') {
+           handleToolAction(clientX, clientY, true);
+           return;
+      }
+
+      // Pencil / Eraser
+      const newGrid = grid.map(row => [...row]);
+      let colorToApply = selectedTool === 'eraser' ? eraserColor : selectedColor;
+      
+      if (newGrid[pos.y][pos.x].id !== colorToApply.id) {
+          newGrid[pos.y][pos.x] = colorToApply;
+          pushToHistory(newGrid);
+      }
+  };
+
   const handleTouchStart = (e: React.TouchEvent) => {
       // Prevent default to stop scrolling
-      // Note: Might need CSS touch-action: none on canvas
       if (e.touches.length === 1) {
           const touch = e.touches[0];
-          handleToolAction(touch.clientX, touch.clientY, true);
+          touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+          
+          // Delay drawing slightly to see if it becomes a 2-finger gesture
+          touchTimer.current = setTimeout(() => {
+              // Timeout reached, user is holding finger down -> Start Draw
+              handleToolAction(touch.clientX, touch.clientY, true);
+              touchTimer.current = null;
+          }, 150);
       } else if (e.touches.length === 2) {
+          // Cancel pending single touch
+          if (touchTimer.current) {
+              clearTimeout(touchTimer.current);
+              touchTimer.current = null;
+          }
+
           const dist = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
               e.touches[0].clientY - e.touches[1].clientY
@@ -323,9 +363,23 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-      if (e.touches.length === 1 && isDrawing) {
-          const touch = e.touches[0];
-          handleToolAction(touch.clientX, touch.clientY, false);
+      if (e.touches.length === 1) {
+          if (touchTimer.current && touchStartRef.current) {
+              // Check if moved enough to count as drag
+              const touch = e.touches[0];
+              const dx = touch.clientX - touchStartRef.current.x;
+              const dy = touch.clientY - touchStartRef.current.y;
+              if (dx*dx + dy*dy > 100) { // > 10px distance
+                  clearTimeout(touchTimer.current);
+                  touchTimer.current = null;
+                  handleToolAction(touch.clientX, touch.clientY, true);
+              }
+          }
+          
+          if (isDrawing) {
+              const touch = e.touches[0];
+              handleToolAction(touch.clientX, touch.clientY, false);
+          }
       } else if (e.touches.length === 2) {
           const dist = Math.hypot(
               e.touches[0].clientX - e.touches[1].clientX,
@@ -349,6 +403,22 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
           lastTouchDistance.current = dist;
           lastTouchCenter.current = { x: centerX, y: centerY };
       }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+      if (touchTimer.current) {
+          // Tap detected
+          clearTimeout(touchTimer.current);
+          touchTimer.current = null;
+          
+          const touch = e.changedTouches[0];
+          handleTap(touch.clientX, touch.clientY);
+          
+          lastTouchDistance.current = null;
+          lastTouchCenter.current = null;
+          return;
+      }
+      handleMouseUp();
   };
 
   const applyTool = (x: number, y: number) => {
@@ -494,7 +564,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
                 onMouseLeave={handleMouseUp}
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
-                onTouchEnd={handleMouseUp}
+                onTouchEnd={handleTouchEnd}
                 onWheel={handleWheel}
                 className="absolute top-0 left-0 w-full h-full touch-none"
             />
