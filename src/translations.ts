@@ -153,6 +153,7 @@ export const translations = {
     paletteName: "色卡名称",
     addPalette: "添加色卡",
     deletePalette: "删除",
+    deletePaletteConfirm: "确定要删除这个色卡吗？",
     custom: "自定义",
     footerOpenSource: "开源地址",
     footerStar: "点个 Star",
@@ -187,6 +188,9 @@ export const translations = {
     toolFlipV: "垂直翻转",
     toolRotate: "旋转90°",
     toolClear: "清空",
+    clearConfirmText: "确定要清空画布吗？",
     eraserColor: "橡皮擦颜色",
+    fdZoom: "缩放: {zoom}% | Shift+点击平移",
+    fdTouch: "双指操作平移/缩放",
   },
 };

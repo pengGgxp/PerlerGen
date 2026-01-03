@@ -671,7 +671,7 @@ const App = () => {
                      {selectedPaletteId.startsWith('custom_') && (
                        <button
                          onClick={() => {
-                           if (window.confirm('Are you sure you want to delete this palette?')) {
+                           if (window.confirm(t.deletePaletteConfirm)) {
                              removeCustomPalette(selectedPaletteId);
                            }
                          }}

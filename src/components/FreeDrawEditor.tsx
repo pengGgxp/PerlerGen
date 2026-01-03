@@ -420,8 +420,8 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
                 className="absolute top-0 left-0 w-full h-full touch-none"
             />
              <div className="absolute top-4 right-4 bg-white/80 p-2 rounded shadow text-xs pointer-events-none select-none z-20">
-                <span className="hidden md:inline">Zoom: {Math.round(zoom * 100)}% | Shift+Click to Pan</span>
-                <span className="md:hidden">Use 2 fingers to Pan/Zoom</span>
+                <span className="hidden md:inline">{t.fdZoom.replace('{zoom}', Math.round(zoom * 100).toString())}</span>
+                <span className="md:hidden">{t.fdTouch}</span>
             </div>
         </div>
 
