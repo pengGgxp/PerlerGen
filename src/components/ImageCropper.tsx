@@ -71,13 +71,19 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
       const w = Math.round(completedCrop.width * scaleX);
       const h = Math.round(completedCrop.height * scaleY);
 
+      // Boundary checks to prevent rounding errors causing out-of-bounds
+      const safeX = Math.max(0, x);
+      const safeY = Math.max(0, y);
+      const safeW = Math.min(w, img.naturalWidth - safeX);
+      const safeH = Math.min(h, img.naturalHeight - safeY);
+
       // Validate dimensions
-      if (w <= 0 || h <= 0) {
+      if (safeW <= 0 || safeH <= 0) {
           onConfirm(imageSrc);
           return;
       }
 
-      image.crop({ x, y, w, h });
+      image.crop({ x: safeX, y: safeY, w: safeW, h: safeH });
       
       // 使用 getBase64 替代 getBase64Async
       const base64 = await image.getBase64("image/png");
