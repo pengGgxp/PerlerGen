@@ -1,26 +1,25 @@
 import { Palette } from "./types";
-import { PERLER_COLORS } from "./beads/perler";
-import { HAMA_COLORS } from "./beads/hama";
-import { ARTKAL_S_COLORS } from "./beads/artkal";
-import { GENERIC_291_COLORS } from "./beads/generic291";
-import { PERLER_221_COLORS } from "./beads/perler221";
+
 import { MARD_221_COLORS } from "./beads/mard221";
 import { MARD_291_COLORS } from "./beads/mard291";
+import { MARD_264_COLORS } from "./beads/mard264";
+import { MARD_96_COLORS } from "./beads/mard96";
+import { MARD_144_COLORS } from "./beads/mard144";
 
 // Re-export colors and utils
-export { PERLER_COLORS } from "./beads/perler";
-export { HAMA_COLORS } from "./beads/hama";
-export { ARTKAL_S_COLORS } from "./beads/artkal";
-export { GENERIC_291_COLORS } from "./beads/generic291";
-export { PERLER_221_COLORS } from "./beads/perler221";
+
 export { MARD_221_COLORS } from "./beads/mard221";
 export { MARD_291_COLORS } from "./beads/mard291";
+export { MARD_264_COLORS } from "./beads/mard264";
+export { MARD_96_COLORS } from "./beads/mard96";
+export { MARD_144_COLORS } from "./beads/mard144";
+
 export { hexToRgb, getColorDistance } from "./beads/utils";
 
 export const AVAILABLE_PALETTES: Palette[] = [
   {
-    id: "mard_265",
-    name: "Mard Beads (265 Colors) / M豆265色",
+    id: "mard_291",
+    name: "Mard Beads (291 Colors) / M豆291色",
     colors: MARD_291_COLORS,
   },
   {
@@ -28,29 +27,19 @@ export const AVAILABLE_PALETTES: Palette[] = [
     name: "Mard Beads (221 Colors) / M豆221色",
     colors: MARD_221_COLORS,
   },
-  //下面的部分是由于一开始不懂，添加的一些全网搜索到的色卡，不适用，所以注释掉
-  // {
-  //   id: "perler",
-  //   name: "Perler (Standard 60+) / 拼拼豆豆",
-  //   colors: PERLER_COLORS,
-  // },
-  // {
-  //   id: "artkal",
-  //   name: "Artkal (Full S-Series) / 硬豆S系列",
-  //   colors: ARTKAL_S_COLORS,
-  // },
-  // {
-  //   id: "generic_291",
-  //   name: "Generic 291 (Series A-Z) / 通用291色 (A-Z系列)",
-  //   colors: GENERIC_291_COLORS,
-  // },
-  // {
-  //   id: "perler_221",
-  //   name: "Perler (221 Colors) / 拼豆221色",
-  //   colors: PERLER_221_COLORS,
-  // },
-  // { id: "hama", name: "Hama Beads / 哈马珠", colors: HAMA_COLORS },
+  {
+    id: "mard_264",
+    name: "Mard Beads (264 Colors) / M豆264色",
+    colors: MARD_264_COLORS,
+  },
+  {
+    id: "mard_96",
+    name: "Mard Beads (96 Colors) / M豆96色",
+    colors: MARD_96_COLORS,
+  },
+  {
+    id: "mard_144",
+    name: "Mard Beads (144 Colors) / M豆144色",
+    colors: MARD_144_COLORS,
+  },
 ];
-
-// Compatibility export
-export const BEAD_PALETTE = PERLER_COLORS;
