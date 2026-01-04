@@ -4,6 +4,7 @@ import 'react-image-crop/dist/ReactCrop.css';
 import { NeuButton, NeuCard } from './NeumorphicComponents';
 import { Jimp } from 'jimp';
 import { translations } from '../translations';
+import { Logger } from '../services/logger';
 import { Icon } from '@iconify/react';
 
 interface Props {
@@ -42,9 +43,15 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
+    Logger.log('crop_image_loaded', { width, height });
     const startCrop = centerAspectCrop(width, height);
     setCrop(startCrop);
     setCompletedCrop(startCrop);
+  };
+
+  const handleCancel = () => {
+    Logger.log('crop_cancelled');
+    onCancel();
   };
 
   const handleCropConfirm = async () => {
@@ -87,9 +94,11 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
       
       // 使用 getBase64 替代 getBase64Async
       const base64 = await image.getBase64("image/png");
+      Logger.log('crop_success', { width: safeW, height: safeH });
       onConfirm(base64);
     } catch (err) {
       console.error("Jimp cropping failed:", err);
+      Logger.log('crop_failed', { error: String(err) });
       alert(t.cropError);
       onConfirm(imageSrc);
     } finally {
@@ -102,7 +111,7 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
       <NeuCard className="bg-slate-200 max-w-7xl w-full h-[100dvh] md:h-[90vh] flex flex-col gap-2 md:gap-4 overflow-hidden rounded-none md:rounded-2xl">
         <div className="flex justify-between items-center border-b border-slate-300 pb-2 px-4 pt-2 md:pt-0">
             <h2 className="text-xl font-bold text-slate-700">{t.cropTitle}</h2>
-            <button onClick={onCancel} className="text-slate-500 hover:text-slate-700">
+            <button onClick={handleCancel} className="text-slate-500 hover:text-slate-700">
                 <Icon icon="lucide:x" className="w-6 h-6" />
             </button>
         </div>
@@ -129,7 +138,7 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
             className="flex justify-end gap-4 pt-2 px-4 pb-4 md:pb-0"
             style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
         >
-            <NeuButton onClick={onCancel} className="bg-slate-300 text-slate-600 hover:bg-slate-400">
+            <NeuButton onClick={handleCancel} className="bg-slate-300 text-slate-600 hover:bg-slate-400">
                 {t.cropCancel}
             </NeuButton>
             <NeuButton 
