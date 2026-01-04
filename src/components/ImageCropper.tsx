@@ -40,6 +40,7 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [isProcessing, setIsProcessing] = useState(false);
   const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
@@ -106,6 +107,31 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
     }
   };
 
+  const handleCropChange = (pixelCrop: PixelCrop) => {
+    setCrop(pixelCrop);
+
+    if (containerRef.current && imgRef.current) {
+      const container = containerRef.current;
+      const containerRect = container.getBoundingClientRect();
+      const imgRect = imgRef.current.getBoundingClientRect();
+      
+      const cropTop = imgRect.top + pixelCrop.y;
+      const cropBottom = cropTop + pixelCrop.height;
+      
+      const SCROLL_MARGIN = 40; // 触发滚动的边缘距离
+      const SCROLL_SPEED = 20;  // 滚动速度
+
+      // 向下滚动
+      if (cropBottom > containerRect.bottom - SCROLL_MARGIN) {
+        container.scrollTop += SCROLL_SPEED;
+      }
+      // 向上滚动
+      else if (cropTop < containerRect.top + SCROLL_MARGIN) {
+        container.scrollTop -= SCROLL_SPEED;
+      }
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-0 md:p-4">
       <NeuCard className="bg-slate-200 max-w-7xl w-full h-[100dvh] md:h-[90vh] flex flex-col gap-2 md:gap-4 overflow-hidden rounded-none md:rounded-2xl">
@@ -116,10 +142,10 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
             </button>
         </div>
         
-        <div className="flex-1 min-h-0 overflow-auto flex bg-slate-800/10 rounded-lg p-2 md:p-4 touch-none">
+        <div ref={containerRef} className="flex-1 min-h-0 overflow-auto flex bg-slate-800/10 rounded-lg p-2 md:p-4 touch-none">
             <ReactCrop 
                 crop={crop} 
-                onChange={(pixelCrop) => setCrop(pixelCrop)}
+                onChange={handleCropChange}
                 onComplete={(c) => setCompletedCrop(c)}
                 className="m-auto"
                 style={{ maxWidth: '100%', maxHeight: '100%' }}
