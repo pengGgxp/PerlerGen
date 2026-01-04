@@ -680,7 +680,7 @@ const App = () => {
             
             <div className="flex flex-col gap-1">
               <label className="text-xs font-bold text-slate-400 ml-2 uppercase">{t.uploadImage}</label>
-              <NeuFileUpload accept="image/*" onChange={handleFileUpload}>
+              <NeuFileUpload accept="image/png,image/jpeg,image/jpg,image/webp" onChange={handleFileUpload}>
                 {t.uploadImage}
               </NeuFileUpload>
             </div>
