@@ -88,12 +88,6 @@ export const NeuRange: React.FC<React.InputHTMLAttributes<HTMLInputElement> & { 
 );
 
 export const NeuFileUpload: React.FC<{ onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, accept?: string, children?: ReactNode, className?: string }> = ({ onChange, accept, children, className }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e);
     // Clear the input value to allow selecting the same file again
@@ -104,15 +98,7 @@ export const NeuFileUpload: React.FC<{ onChange: (e: React.ChangeEvent<HTMLInput
 
   return (
     <div className={className}>
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleChange}
-        accept={accept}
-        className="hidden"
-      />
-      <div 
-        onClick={handleClick}
+      <label 
         className={`
           ${BASE_BG} ${SHADOW_OUT}
           rounded-xl p-6 cursor-pointer
@@ -123,11 +109,17 @@ export const NeuFileUpload: React.FC<{ onChange: (e: React.ChangeEvent<HTMLInput
           group
         `}
       >
+        <input
+          type="file"
+          onChange={handleChange}
+          accept={accept}
+          className="hidden"
+        />
         <div className="p-3 rounded-full bg-[#e0e5ec] shadow-[inset_4px_4px_8px_0_rgba(163,177,198,0.7),inset_-4px_-4px_8px_0_rgba(255,255,255,0.8)] group-hover:shadow-[9px_9px_16px_rgb(163,177,198,0.6),-9px_-9px_16px_rgba(255,255,255,0.5)] transition-all duration-300">
           <Icon icon="lucide:upload" className="w-8 h-8 text-slate-500 group-hover:text-slate-600 group-hover:scale-110 transition-all" />
         </div>
         <span className="font-bold text-slate-500 group-hover:text-slate-700">{children || 'Upload File'}</span>
-      </div>
+      </label>
     </div>
   );
 };

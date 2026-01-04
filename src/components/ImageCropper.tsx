@@ -22,10 +22,10 @@ function centerAspectCrop(
   return centerCrop(
     makeAspectCrop(
       {
-        unit: '%',
-        width: 90,
+        unit: 'px',
+        width: mediaWidth * 0.9,
       },
-      aspect || 16 / 9, // Default aspect, but we allow free crop
+      aspect || 16 / 9,
       mediaWidth,
       mediaHeight,
     ),
@@ -42,27 +42,27 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
 
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
-    setCrop(centerAspectCrop(width, height));
+    const startCrop = centerAspectCrop(width, height);
+    setCrop(startCrop);
+    setCompletedCrop(startCrop);
   };
 
   const handleCropConfirm = async () => {
     if (!completedCrop || !imgRef.current) {
-      // If no crop, just return original
       onConfirm(imageSrc);
       return;
     }
 
     setIsProcessing(true);
     try {
-      // Use Jimp for cropping as requested
       const image = await Jimp.read(imageSrc);
-      
-      // Calculate scale if the displayed image is scaled
-      // But here we use the natural dimensions from the crop data if we use the image ref correctly
-      // React-image-crop returns coordinates relative to the *displayed* image usually, 
-      // but PixelCrop is in pixels. We need to map it to natural dimensions.
-      
       const img = imgRef.current;
+      
+      // Ensure we have valid dimensions
+      if (!img.width || !img.height) {
+        throw new Error("Image dimensions not available");
+      }
+
       const scaleX = img.naturalWidth / img.width;
       const scaleY = img.naturalHeight / img.height;
 
@@ -107,10 +107,10 @@ export const ImageCropper: React.FC<Props> = ({ imageSrc, onConfirm, onCancel, t
             </button>
         </div>
         
-        <div className="flex-1 min-h-0 overflow-auto flex bg-slate-800/10 rounded-lg p-2 md:p-4">
+        <div className="flex-1 min-h-0 overflow-auto flex bg-slate-800/10 rounded-lg p-2 md:p-4 touch-none">
             <ReactCrop 
                 crop={crop} 
-                onChange={(_, percentCrop) => setCrop(percentCrop)}
+                onChange={(pixelCrop) => setCrop(pixelCrop)}
                 onComplete={(c) => setCompletedCrop(c)}
                 className="m-auto"
                 style={{ maxWidth: '100%', maxHeight: '100%' }}
