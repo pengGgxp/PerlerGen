@@ -17,7 +17,7 @@ export interface PatternExportOptions {
 }
 
 export interface SplitExportOptions extends PatternExportOptions {
-  splitConfig: { width: number; height: number };
+  splitConfig: { width: number; height: number; padding: number };
   isDualExport: boolean;
 }
 
@@ -149,7 +149,7 @@ export class ExportController {
 
     try {
       const zip = new JSZip();
-      const { width: chunkW, height: chunkH } = splitConfig;
+      const { width: chunkW, height: chunkH, padding = 0 } = splitConfig;
 
       const rows = Math.ceil(patternData.height / chunkH);
       const cols = Math.ceil(patternData.width / chunkW);
@@ -158,14 +158,45 @@ export class ExportController {
         for (let c = 0; c < cols; c++) {
           const startX = c * chunkW;
           const startY = r * chunkH;
-          const currentWidth = Math.min(chunkW, patternData.width - startX);
-          const currentHeight = Math.min(chunkH, patternData.height - startY);
+
+          // Calculate drawing bounds including padding
+          // Note: startX/startY for drawing can be negative if padding > 0 and we are at the edge
+          const drawStartX = startX - padding;
+          const drawStartY = startY - padding;
+
+          // Calculate width/height for the canvas
+          // We want the canvas to be (chunkW + 2*padding) x (chunkH + 2*padding)
+          // EXCEPT at the far edges where the pattern ends.
+          // Actually, if we want to show "empty space" where there is no pattern, we can just use fixed size.
+          // But usually we just clip to pattern bounds for the "end" if we don't want empty space.
+          // However, consistency is often better.
+          // Let's stick to the logic: Draw what is requested.
+          // But if we are at the right edge, do we draw 29+padding?
+          // If the pattern ends at 30, and we are drawing 29-58.
+          // If we are at the last chunk, say startX=58, width=2.
+          // We probably want to draw (2 + padding*2)? Or (2 + padding)?
+          // Let's use:
+          // The logical chunk is [startX, startX + chunkW].
+          // The visual chunk is [startX - padding, startX + chunkW + padding].
+
+          // However, we should probably clamp the "logical end" to pattern width to determine the "core" size if needed,
+          // but for the *canvas size*, keeping it uniform (chunkW + 2*padding) is nice for printing,
+          // UNLESS it's the last row/col where the pattern is small.
+
+          // Let's determine the size based on the pattern intersection.
+          // Original logic: min(chunkW, patternData.width - startX)
+
+          const logicalWidth = Math.min(chunkW, patternData.width - startX);
+          const logicalHeight = Math.min(chunkH, patternData.height - startY);
+
+          const drawWidth = logicalWidth + padding * 2;
+          const drawHeight = logicalHeight + padding * 2;
 
           const canvas = drawPatternToCanvas(patternData, {
-            startX,
-            startY,
-            width: currentWidth,
-            height: currentHeight,
+            startX: drawStartX,
+            startY: drawStartY,
+            width: drawWidth,
+            height: drawHeight,
             beadShape,
             hiddenBeadIds,
             title: isDualExport
@@ -188,10 +219,10 @@ export class ExportController {
           // If Dual Export is enabled, generate P2 chunk (Rotated Text)
           if (isDualExport) {
             const canvasP2 = drawPatternToCanvas(patternData, {
-              startX,
-              startY,
-              width: currentWidth,
-              height: currentHeight,
+              startX: drawStartX,
+              startY: drawStartY,
+              width: drawWidth,
+              height: drawHeight,
               beadShape,
               hiddenBeadIds,
               title: `P2 - ${siteLabel} (${r + 1}-${c + 1})`,

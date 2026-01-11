@@ -154,8 +154,9 @@ export const drawPatternToCanvas = (
       const gridY = startY + y;
       const gridX = startX + x;
 
-      // Boundary check (should not happen if loops are correct, but safety first)
-      if (gridY >= data.height || gridX >= data.width) continue;
+      // Boundary check
+      if (gridY < 0 || gridX < 0 || gridY >= data.height || gridX >= data.width)
+        continue;
 
       const bead = data.grid[gridY][gridX];
 

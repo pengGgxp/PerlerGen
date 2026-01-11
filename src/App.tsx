@@ -78,7 +78,7 @@ const App = () => {
 
   // Split Export State
   const [showSplitModal, setShowSplitModal] = useState(false);
-  const [splitConfig, setSplitConfig] = useState({ width: 29, height: 29 });
+  const [splitConfig, setSplitConfig] = useState({ width: 29, height: 29, padding: 0 });
   const [isExporting, setIsExporting] = useState(false);
   const [showDonationModal, setShowDonationModal] = useState(false);
   
@@ -1174,6 +1174,17 @@ const App = () => {
                     className="text-center w-full"
                 />
              </div>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <label className="text-xs font-bold text-slate-400 uppercase ml-1 mb-1 block truncate">{t.splitPadding}</label>
+            <NeuInput 
+                type="number"
+                value={splitConfig.padding}
+                onChange={(e) => setSplitConfig(prev => ({...prev, padding: Number(e.target.value)}))}
+                min="0"
+                className="text-center w-full"
+            />
           </div>
 
           <div className="flex justify-end pt-2">
