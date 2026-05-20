@@ -1,5 +1,7 @@
 import { BeadColor } from "../types";
 
+const HEX_COLOR_RE = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
 export const parsePaletteCSV = (csvContent: string): BeadColor[] => {
   const lines = csvContent.split(/\r?\n/);
   const colors: BeadColor[] = [];
@@ -33,7 +35,7 @@ export const parsePaletteCSV = (csvContent: string): BeadColor[] => {
       hex = "#" + hex;
     }
 
-    if (id && hex) {
+    if (id && name && HEX_COLOR_RE.test(hex)) {
         colors.push({ id, name, hex });
     }
   }

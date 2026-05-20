@@ -62,6 +62,8 @@ const App = () => {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const hasDraggedRef = useRef(false);
 
   // Material State
   const [hiddenBeadIds, setHiddenBeadIds] = useState<Set<string>>(new Set());
@@ -99,6 +101,21 @@ const App = () => {
 
   // Free Draw State
   const [isFreeDrawMode, setIsFreeDrawMode] = useState(false);
+
+  const toPositiveInt = (value: number | string, fallback: number, min = 1) => {
+    const parsed = Math.floor(Number(value));
+    return Number.isFinite(parsed) ? Math.max(min, parsed) : fallback;
+  };
+
+  const getSafeSplitConfig = (config = splitConfig) => ({
+    width: toPositiveInt(config.width, 29, 10),
+    height: toPositiveInt(config.height, 29, 10),
+    padding: toPositiveInt(config.padding, 0, 0),
+  });
+
+  const isInteractiveTarget = (target: EventTarget | null) => {
+    return target instanceof HTMLElement && !!target.closest('button, input, select, textarea, label, a');
+  };
 
   // Initialize Logger
   useEffect(() => {
@@ -212,7 +229,7 @@ const App = () => {
 
   // Handle Dimension Changes
   const handleWidthChange = (val: string) => {
-    const w = parseInt(val) || 0;
+    const w = toPositiveInt(val, gridWidth);
     setGridWidth(w);
     if (lockRatio && imgAspectRatio > 0 && w > 0) {
         setGridHeight(Math.max(1, Math.round(w / imgAspectRatio)));
@@ -220,7 +237,7 @@ const App = () => {
   };
 
   const handleHeightChange = (val: string) => {
-    const h = parseInt(val) || 0;
+    const h = toPositiveInt(val, gridHeight);
     setGridHeight(h);
     if (lockRatio && imgAspectRatio > 0 && h > 0) {
         setGridWidth(Math.max(1, Math.round(h * imgAspectRatio)));
@@ -462,6 +479,9 @@ const App = () => {
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (!patternData) return;
+    if (isInteractiveTarget(e.target)) return;
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
+    hasDraggedRef.current = false;
     setIsDragging(true);
     setLastMousePos({ x: e.clientX, y: e.clientY });
   };
@@ -470,6 +490,11 @@ const App = () => {
     if (!isDragging) return;
     const deltaX = e.clientX - lastMousePos.x;
     const deltaY = e.clientY - lastMousePos.y;
+    const totalDeltaX = e.clientX - dragStartRef.current.x;
+    const totalDeltaY = e.clientY - dragStartRef.current.y;
+    if (Math.hypot(totalDeltaX, totalDeltaY) > 5) {
+      hasDraggedRef.current = true;
+    }
     setPan(prev => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
     setLastMousePos({ x: e.clientX, y: e.clientY });
   };
@@ -483,11 +508,15 @@ const App = () => {
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (!patternData) return;
+    if (isInteractiveTarget(e.target)) return;
     
     if (e.touches.length === 1) {
+        dragStartRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        hasDraggedRef.current = false;
         setIsDragging(true);
         setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     } else if (e.touches.length === 2) {
+        hasDraggedRef.current = true;
         const dist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
@@ -504,9 +533,15 @@ const App = () => {
     if (e.touches.length === 1 && isDragging) {
         const deltaX = e.touches[0].clientX - lastMousePos.x;
         const deltaY = e.touches[0].clientY - lastMousePos.y;
+        const totalDeltaX = e.touches[0].clientX - dragStartRef.current.x;
+        const totalDeltaY = e.touches[0].clientY - dragStartRef.current.y;
+        if (Math.hypot(totalDeltaX, totalDeltaY) > 5) {
+          hasDraggedRef.current = true;
+        }
         setPan(prev => ({ x: prev.x + deltaX, y: prev.y + deltaY }));
         setLastMousePos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
     } else if (e.touches.length === 2) {
+        hasDraggedRef.current = true;
         const dist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
@@ -530,9 +565,9 @@ const App = () => {
   // Canvas Click for Pixel Editing
   const handleCanvasClick = (e: React.MouseEvent) => {
     // Only register click if we didn't drag
-    if (isDragging) return; 
+    if (isDragging || hasDraggedRef.current || isInteractiveTarget(e.target)) return;
     // Small threshold to distinguish click from micro-drag
-    const dist = Math.sqrt(Math.pow(e.clientX - lastMousePos.x, 2) + Math.pow(e.clientY - lastMousePos.y, 2));
+    const dist = Math.hypot(e.clientX - dragStartRef.current.x, e.clientY - dragStartRef.current.y);
     if (dist > 5) return;
 
     if (!patternData || !containerRef.current) return;
@@ -614,8 +649,10 @@ const App = () => {
 
   const handleSplitDownload = async () => {
     if (!patternData) return;
+    const safeSplitConfig = getSafeSplitConfig();
+    setSplitConfig(safeSplitConfig);
     setIsExporting(true);
-    Logger.log('export_pattern_start', { type: 'split', isDualExport, splitConfig });
+    Logger.log('export_pattern_start', { type: 'split', isDualExport, splitConfig: safeSplitConfig });
 
     try {
       await ExportController.exportSplitPattern({
@@ -625,7 +662,7 @@ const App = () => {
         patternData,
         beadShape,
         hiddenBeadIds,
-        splitConfig,
+        splitConfig: safeSplitConfig,
         isDualExport
       });
       
@@ -641,6 +678,7 @@ const App = () => {
   };
 
 
+  const splitPreviewConfig = getSafeSplitConfig();
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center gap-6 bg-[#e0e5ec]">
@@ -1146,9 +1184,9 @@ const App = () => {
         <div className="flex flex-col gap-6">
           <p className="text-sm text-slate-600">
             {patternData ? t.splitInfo
-                .replace('{rows}', Math.ceil(patternData.height / splitConfig.height).toString())
-                .replace('{cols}', Math.ceil(patternData.width / splitConfig.width).toString())
-                .replace('{total}', (Math.ceil(patternData.height / splitConfig.height) * Math.ceil(patternData.width / splitConfig.width)).toString())
+                .replace('{rows}', Math.ceil(patternData.height / splitPreviewConfig.height).toString())
+                .replace('{cols}', Math.ceil(patternData.width / splitPreviewConfig.width).toString())
+                .replace('{total}', (Math.ceil(patternData.height / splitPreviewConfig.height) * Math.ceil(patternData.width / splitPreviewConfig.width)).toString())
               : ''}
           </p>
           
@@ -1158,7 +1196,7 @@ const App = () => {
                 <NeuInput 
                     type="number"
                     value={splitConfig.width}
-                    onChange={(e) => setSplitConfig(prev => ({...prev, width: Number(e.target.value)}))}
+                    onChange={(e) => setSplitConfig(prev => ({...prev, width: toPositiveInt(e.target.value, prev.width, 10)}))}
                     min="10"
                     className="text-center w-full"
                 />
@@ -1169,7 +1207,7 @@ const App = () => {
                 <NeuInput 
                     type="number"
                     value={splitConfig.height}
-                    onChange={(e) => setSplitConfig(prev => ({...prev, height: Number(e.target.value)}))}
+                    onChange={(e) => setSplitConfig(prev => ({...prev, height: toPositiveInt(e.target.value, prev.height, 10)}))}
                     min="10"
                     className="text-center w-full"
                 />
@@ -1181,7 +1219,7 @@ const App = () => {
             <NeuInput 
                 type="number"
                 value={splitConfig.padding}
-                onChange={(e) => setSplitConfig(prev => ({...prev, padding: Number(e.target.value)}))}
+                onChange={(e) => setSplitConfig(prev => ({...prev, padding: toPositiveInt(e.target.value, prev.padding, 0)}))}
                 min="0"
                 className="text-center w-full"
             />

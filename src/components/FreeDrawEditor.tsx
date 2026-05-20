@@ -60,6 +60,11 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
   const [showStats, setShowStats] = useState(false);
   const [popoverCoords, setPopoverCoords] = useState({ x: 0, bottom: 0 });
 
+  const getGridSize = (sourceGrid = grid) => ({
+    height: sourceGrid.length,
+    width: sourceGrid[0]?.length || 0,
+  });
+
   const toggleColorPicker = (e: React.MouseEvent) => {
       const rect = e.currentTarget.getBoundingClientRect();
       setPopoverCoords({
@@ -202,6 +207,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
   const getGridPos = (clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return null;
+    const { width: currentWidth, height: currentHeight } = getGridSize();
     const rect = canvas.getBoundingClientRect();
     const x = clientX - rect.left - pan.x;
     const y = clientY - rect.top - pan.y;
@@ -210,7 +216,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
     const gridX = Math.floor(x / cellSize);
     const gridY = Math.floor(y / cellSize);
 
-    if (gridX >= 0 && gridX < patternData.width && gridY >= 0 && gridY < patternData.height) {
+    if (gridX >= 0 && gridX < currentWidth && gridY >= 0 && gridY < currentHeight) {
       return { x: gridX, y: gridY };
     }
     return null;
@@ -231,6 +237,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
         if (selectedTool === 'bucket') {
             const targetColor = grid[pos.y][pos.x];
             const replaceColor = selectedColor;
+            const { width: currentWidth, height: currentHeight } = getGridSize();
             
             if (targetColor.id === replaceColor.id) return;
 
@@ -248,9 +255,9 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
                     newGrid[y][x] = replaceColor;
                     
                     if (x > 0) stack.push({x: x-1, y});
-                    if (x < patternData.width - 1) stack.push({x: x+1, y});
+                    if (x < currentWidth - 1) stack.push({x: x+1, y});
                     if (y > 0) stack.push({x, y: y-1});
-                    if (y < patternData.height - 1) stack.push({x, y: y+1});
+                    if (y < currentHeight - 1) stack.push({x, y: y+1});
                 }
             }
             pushToHistory(newGrid);
@@ -441,7 +448,7 @@ export const FreeDrawEditor: React.FC<FreeDrawEditorProps> = ({
   
   // Wheel Zoom
   const handleWheel = (e: React.WheelEvent) => {
-      // e.preventDefault(); // Can't prevent default in React synthetic event easily if passive
+      e.preventDefault();
       const zoomSensitivity = 0.001;
       setZoom(prev => Math.min(Math.max(0.1, prev - e.deltaY * zoomSensitivity), 5));
   };
